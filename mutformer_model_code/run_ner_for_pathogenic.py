@@ -373,16 +373,10 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, mask, s
             "output_bias", [num_labels], initializer=tf.zeros_initializer())
         logits = tf.matmul(input_tensor, output_weights, transpose_b=True)
         logits = tf.nn.bias_add(logits, output_bias)
-        print(input_tensor.shape.as_list())
-        print(logits.shape.as_list())
-        print(labels.shape.as_list())
         probabilities = tf.nn.softmax(logits, axis=-1)
         log_probs = tf.nn.log_softmax(logits, axis=-1)
-        print("not dead")
 
         one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
-        print(one_hot_labels.shape.as_list())
-        print(logits.shape.as_list())
         tot_loss = 0
         for n in range(0,one_hot_labels.shape.as_list()[0]):
             for l in range(0, num_labels):
@@ -415,12 +409,6 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
         segment_ids = features["segment_ids"]
         label_ids = features["label_ids"]
         mutation_masks = features["mutation_mask"]
-
-        is_real_example = None
-        if "is_real_example" in features:
-            is_real_example = tf.cast(features["is_real_example"], dtype=tf.float32)
-        else:
-            is_real_example = tf.ones(tf.shape(label_ids), dtype=tf.float32)
 
         is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -511,13 +499,8 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
                 ner_predictions_1hot = tf.one_hot(tf.cast(ner_predictions, tf.int32),depth=num_labels, axis=-1)
 
                 ner_ids_int = tf.reshape(ner_ids, [-1])
-                print("logits", ner_logits)
-                print("preds", ner_predictions)
-                print("ids", ner_ids_int)
-                print("ids1hot", ner_ids_1hot)
 
                 dice_f1_div = metric_functions.multiclass_f1_dice(ner_logits, ner_ids_1hot,ner_mask)
-                print("got dice")
                 recall_div = metric_functions.multiclass_recall(ner_predictions_1hot, ner_ids_1hot,ner_mask)
                 precision_div = metric_functions.multiclass_precision(ner_predictions_1hot, ner_ids_1hot,ner_mask)
                 acc_div = metric_functions.acc(ner_predictions, ner_ids_int,ner_mask)
@@ -606,8 +589,6 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
                 def host_call_fn(probs, labels, masks):
                     with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                         with tf.contrib.summary.always_record_summaries():
-                            print("probs shape:", probs.shape)
-                            print("label shape:", labels.shape)
                             for n in range(0, probs.shape.as_list()[0]):
                                 positive_class_probs = probs[n,:,1] * tf.cast(masks[n],tf.float32)
                                 tf.contrib.summary.scalar('positive_class_probability', tf.reduce_sum(positive_class_probs), step=n)

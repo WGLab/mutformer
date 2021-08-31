@@ -464,7 +464,8 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
 
 def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, weights=None,freezing=None,
-                     yield_predictions=False,bert=modeling.BertModel, test_results_dir=None,weight_decay = 0.01,epsilon=1e-4,optim="adam",clip_grads=True):
+                     yield_predictions=False,bert=modeling.BertModel, test_results_dir=None,weight_decay = 0.01,
+                     epsilon=1e-4,optim="adam",clip_grads=True):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -483,11 +484,6 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
     input_mask = features["input_mask"]
     segment_ids = features["segment_ids"]
     label_ids = features["label_ids"]
-    is_real_example = None
-    if "is_real_example" in features:
-      is_real_example = tf.cast(features["is_real_example"], dtype=tf.float32)
-    else:
-      is_real_example = tf.ones(tf.shape(label_ids), dtype=tf.float32)
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -566,27 +562,22 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
             num_warmup_steps, use_tpu,tvars=not_frozen if freezing else None,
             weight_decay=weight_decay,epsilon=epsilon,optimizer_name=optim,clip=clip_grads)
 
-        def train_metrics(mrpc_ids, mrpc_logits):
+        def train_metrics(ids, logits):
             """Computes the loss and accuracy of the model."""
-            mrpc_logits = tf.nn.softmax(tf.reshape(mrpc_logits, [-1, mrpc_logits.shape[-1]]),
+            logits = tf.nn.softmax(tf.reshape(logits, [-1, logits.shape[-1]]),
                                        axis=-1)
 
-            mrpc_ids_1hot = tf.one_hot(tf.cast(mrpc_ids, tf.int32), depth=num_labels, axis=-1)
-            mrpc_ids_1hot = tf.reshape(mrpc_ids_1hot, [-1, mrpc_ids_1hot.shape[-1]])
-            mrpc_predictions = tf.argmax(mrpc_logits, axis=-1, output_type=tf.int32)
-            mrpc_predictions_1hot = tf.one_hot(tf.cast(mrpc_predictions, tf.int32),
+            ids_1hot = tf.one_hot(tf.cast(ids, tf.int32), depth=num_labels, axis=-1)
+            ids_1hot = tf.reshape(ids_1hot, [-1, ids_1hot.shape[-1]])
+            predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
+            predictions_1hot = tf.one_hot(tf.cast(predictions, tf.int32),
                                               depth=num_labels, axis=-1)
-            mrpc_ids_int = tf.reshape(mrpc_ids, [-1])
-            print("logits", mrpc_logits)
-            print("preds", mrpc_predictions)
-            print("ids", mrpc_ids_int)
-            print("ids1hot", mrpc_ids_1hot)
+            ids_int = tf.reshape(ids, [-1])
 
-            dice_f1_div = metric_functions.multiclass_f1_dice(mrpc_logits, mrpc_ids_1hot)
-            print("got dice")
-            recall_div = metric_functions.multiclass_recall(mrpc_predictions_1hot, mrpc_ids_1hot)
-            precision_div = metric_functions.multiclass_precision(mrpc_predictions_1hot, mrpc_ids_1hot)
-            acc_div = metric_functions.acc(mrpc_predictions, mrpc_ids_int)
+            dice_f1_div = metric_functions.multiclass_f1_dice(logits, ids_1hot)
+            recall_div = metric_functions.multiclass_recall(predictions_1hot, ids_1hot)
+            precision_div = metric_functions.multiclass_precision(predictions_1hot, ids_1hot)
+            acc_div = metric_functions.acc(predictions, ids_int)
 
             dice_f1 = dice_f1_div[0] / dice_f1_div[1]
             recall = recall_div[0] / recall_div[1]
@@ -633,34 +624,34 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
             host_call=host_call)
     elif mode == tf.estimator.ModeKeys.EVAL:
 
-        def metric_fn(mrpc_ids, mrpc_logits):
+        def metric_fn(ids, logits):
             """Computes the loss and accuracy of the model."""
-            mrpc_logits = tf.nn.softmax(tf.reshape(mrpc_logits, [-1, mrpc_logits.shape[-1]]),
+            logits = tf.nn.softmax(tf.reshape(logits, [-1, logits.shape[-1]]),
                                        axis=-1)
 
-            mrpc_ids_1hot = tf.one_hot(tf.cast(mrpc_ids, tf.int32), depth=num_labels, axis=-1)
-            mrpc_ids_1hot = tf.reshape(mrpc_ids_1hot, [-1, mrpc_ids_1hot.shape[-1]])
-            mrpc_predictions = tf.argmax(mrpc_logits, axis=-1, output_type=tf.int32)
-            mrpc_predictions_1hot = tf.one_hot(tf.cast(mrpc_predictions, tf.int32),
+            ids_1hot = tf.one_hot(tf.cast(ids, tf.int32), depth=num_labels, axis=-1)
+            ids_1hot = tf.reshape(ids_1hot, [-1, ids_1hot.shape[-1]])
+            predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
+            predictions_1hot = tf.one_hot(tf.cast(predictions, tf.int32),
                                               depth=num_labels, axis=-1)
-            mrpc_ids_int = tf.reshape(mrpc_ids, [-1])
+            ids_int = tf.reshape(ids, [-1])
 
-            mrpc_accuracy = tf.metrics.accuracy(
-                labels=mrpc_ids_int,
-                predictions=mrpc_predictions, name="acc")
+            accuracy = tf.metrics.accuracy(
+                labels=ids_int,
+                predictions=predictions, name="acc")
 
-            dice = metric_functions.custom_metric(mrpc_ids_1hot, mrpc_logits,
+            dice = metric_functions.custom_metric(ids_1hot, logits,
                                                   custom_func=metric_functions.multiclass_f1_dice,
                                                   name="dice_f1")
-            precision = metric_functions.custom_metric(mrpc_ids_1hot, mrpc_predictions_1hot,
+            precision = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                        custom_func=metric_functions.multiclass_precision,
                                                        name="multiclass_precision")
-            recall = metric_functions.custom_metric(mrpc_ids_1hot, mrpc_predictions_1hot,
+            recall = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                     custom_func=metric_functions.multiclass_recall,
                                                     name="recall_multiclass")
 
             return {
-                "mrpc_accuracy": mrpc_accuracy,
+                "accuracy": accuracy,
                 "multiclass dice/f1": dice,
                 "precision": precision,
                 "recall": recall,
@@ -672,8 +663,6 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
             def host_call_fn(probs, label):
                 with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                     with tf.contrib.summary.always_record_summaries():
-                        print("probs shape:",probs.shape)
-                        print("label shape:",label.shape)
                         for n in range(0,probs.shape.as_list()[0]):
                             tf.contrib.summary.scalar('positive_class_probability', probs[n][1], step=n)
                             tf.contrib.summary.scalar('label', label[n], step=n)
