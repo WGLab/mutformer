@@ -664,7 +664,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
                 with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                     with tf.contrib.summary.always_record_summaries():
                         #for n in range(0,probs.shape.as_list()[0]):
-                        tf.contrib.summary.image('positive_class_probability', probs[n:,1], step=global_step)
+                        tf.contrib.summary.image('positive_class_probability', probs[:,1], step=global_step)
                         tf.contrib.summary.image('label', label, step=global_step)
 
                         return tf.contrib.summary.all_summary_ops()
