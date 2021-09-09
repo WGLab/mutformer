@@ -657,13 +657,11 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
             def host_call_fn(probs, label):
                 with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                     with tf.contrib.summary.always_record_summaries():
-                        #for n in range(0,probs.shape.as_list()[0]):
-                        print("pos class probs:",tf.stack([tf.cast(probs[:,1],tf.float32)]))
-                        tf.contrib.summary.image('positive_class_probability_'+str(global_step), tf.stack([tf.stack([tf.stack([tf.cast(probs[:,1],tf.float32)],axis=-1)])]), step=global_step)
-                        tf.contrib.summary.image('label'+str(global_step), tf.stack([tf.stack([tf.stack([tf.cast(label,tf.float32)],axis=-1)])]), step=global_step)
+                        for n in range(0, probs.shape.as_list()[0]):
+                            tf.contrib.summary.scalar('positive_class_probability', probs[n][1], step=n)
+                            tf.contrib.summary.scalar('label', label[n], step=n)
 
                         return tf.contrib.summary.all_summary_ops()
-
 
             host_call = (host_call_fn, [probabilities, label_ids])
 
