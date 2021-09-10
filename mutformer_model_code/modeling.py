@@ -107,7 +107,7 @@ class BertConfig(object):
     """Serializes this instance to a JSON string."""
     return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
-def down_block(x, filters, dropout, kernel_size=(3), padding="same", strides=1, pool_size = (2)):
+def two_convs(x, filters, dropout, kernel_size=(3), padding="same", strides=1, pool_size = (2)):
     c = keras.layers.Conv1D(filters, kernel_size, padding=padding, strides=strides, activation="relu", input_shape = x.shape[1:], kernel_initializer='he_normal')(x)
     c = keras.layers.Dropout(dropout)(c)
     c = keras.layers.Conv1D(filters, kernel_size, padding=padding, strides=strides, activation="relu", input_shape = c.shape[1:], kernel_initializer='he_normal')(c)
@@ -361,7 +361,7 @@ class BertModelModified(object):
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
         print("embedding shape:", self.embedding_output.shape)
-        self.embedding_output = down_block(self.embedding_output, config.hidden_size, config.hidden_dropout_prob)
+        self.embedding_output = two_convs(self.embedding_output, config.hidden_size, config.hidden_dropout_prob)
         print("embedding shape:",self.embedding_output.shape)
       with tf.variable_scope("encoder"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D

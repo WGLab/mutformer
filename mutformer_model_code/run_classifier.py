@@ -681,7 +681,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
     else:
         output_spec = tf.contrib.tpu.TPUEstimatorSpec(
             mode=mode,
-            predictions={"probabilities": probabilities[:,:,1],
+            predictions={"probabilities": probabilities[:,1],
                          "labels": label_ids},
             scaffold_fn=scaffold_fn)
     return output_spec
