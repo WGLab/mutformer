@@ -584,18 +584,17 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
             eval_metrics = (metric_fn, [label_ids, logits,mutation_masks])
 
             if yield_predictions:
-                def host_call_fn(probs, labels, inputids, masks):
+                def host_call_fn(probs, labels, masks):
                     with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                         with tf.contrib.summary.always_record_summaries():
                             for n in range(0, probs.shape.as_list()[0]):
                                 positive_class_probs = probs[n,:,1] * tf.cast(masks[n],tf.float32)
                                 tf.contrib.summary.scalar('probability', tf.reduce_sum(positive_class_probs), step=n)
                                 tf.contrib.summary.scalar('label', tf.reduce_sum(tf.cast(labels[n],tf.float32) * tf.cast(masks[n],tf.float32)), step=n)
-                                tf.contrib.summary.scalar('input_id', inputids[n], step=n)
 
                             return tf.contrib.summary.all_summary_ops()
 
-                host_call = (host_call_fn, [probabilities, label_ids, input_ids, mutation_masks])
+                host_call = (host_call_fn, [probabilities, label_ids, mutation_masks])
 
                 output_spec = tf.contrib.tpu.TPUEstimatorSpec(
                     mode=mode,
@@ -613,9 +612,8 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
         else:
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
                 mode=mode,
-                predictions={"probabilities": tf.reduce_sum(probabilities[:,:,1]* tf.cast(mutation_masks,tf.float32)),
-                             "labels": tf.reduce_sum(tf.cast(label_ids,tf.float32) * tf.cast(mutation_masks,tf.float32)),
-                             "input_ids":input_ids},
+                predictions={"probabilities": tf.reduce_sum(probabilities[:,:,1] * tf.cast(mutation_masks,tf.float32),axis=1),
+                             "labels": tf.reduce_sum(tf.cast(label_ids,tf.float32) * tf.cast(mutation_masks,tf.float32),axis=1)},
                 scaffold_fn=scaffold_fn)
         return output_spec
 
