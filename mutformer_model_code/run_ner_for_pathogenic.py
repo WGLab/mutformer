@@ -590,7 +590,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
                             for n in range(0, probs.shape.as_list()[0]):
                                 positive_class_probs = probs[n,:,1] * tf.cast(masks[n],tf.float32)
                                 tf.contrib.summary.scalar('probability', tf.reduce_sum(positive_class_probs), step=n)
-                                tf.contrib.summary.scalar('label', tf.reduce_sum(labels[n] * tf.cast(masks[n],tf.float32)), step=n)
+                                tf.contrib.summary.scalar('label', tf.reduce_sum(tf.cast(labels[n],tf.float32) * tf.cast(masks[n],tf.float32)), step=n)
                                 tf.contrib.summary.scalar('input_id', inputids[n], step=n)
 
                             return tf.contrib.summary.all_summary_ops()
