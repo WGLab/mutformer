@@ -654,16 +654,17 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
         eval_metrics = (metric_fn, [label_ids, logits])
 
         if yield_predictions:
-            def host_call_fn(probs, label):
+            def host_call_fn(probs, label, inputids):
                 with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                     with tf.contrib.summary.always_record_summaries():
                         for n in range(0, probs.shape.as_list()[0]):
-                            tf.contrib.summary.scalar('positive_class_probability', probs[n][1], step=n)
+                            tf.contrib.summary.scalar('probability', probs[n][1], step=n)
                             tf.contrib.summary.scalar('label', label[n], step=n)
+                            tf.contrib.summary.scalar('input_id', inputids[n], step=n)
 
                         return tf.contrib.summary.all_summary_ops()
 
-            host_call = (host_call_fn, [probabilities, label_ids])
+            host_call = (host_call_fn, [probabilities, label_ids, input_ids])
 
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
                 mode=mode,
