@@ -83,15 +83,15 @@ class InputFeatures(object):
 class DataProcessor(object):
   """Base class for data converters for sequence classification data sets."""
 
-  def get_train_examples(self, data_dir):
+  def get_train_examples(self, data_dir, read_range=None):
     """Gets a collection of `InputExample`s for the train set."""
     raise NotImplementedError()
 
-  def get_dev_examples(self, data_dir):
+  def get_dev_examples(self, data_dir, read_range=None):
     """Gets a collection of `InputExample`s for the dev set."""
     raise NotImplementedError()
 
-  def get_test_examples(self, data_dir):
+  def get_test_examples(self, data_dir, read_range=None):
     """Gets a collection of `InputExample`s for prediction."""
     raise NotImplementedError()
 
@@ -100,12 +100,17 @@ class DataProcessor(object):
     raise NotImplementedError()
 
   @classmethod
-  def _read_tsv(cls, input_file, quotechar=None):
+  def _read_tsv(cls, input_file, read_range=None,quotechar=None):
     """Reads a tab separated value file."""
     with tf.gfile.Open(input_file, "r") as f:
       reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
       lines = []
-      for line in tqdm(reader,"reading tsv"):
+      for n,line in enumerate(tqdm(reader,"reading tsv")):
+        if read_range:
+            if n<read_range[0]:
+                continue
+            elif n>=read_range[1]:
+                break
         lines.append(line)
       return lines
 
@@ -114,20 +119,20 @@ class DataProcessor(object):
 class MrpcProcessor(DataProcessor):
   """Processor for the MRPC data set (GLUE version)."""
 
-  def get_train_examples(self, data_dir):
+  def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
+        self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
 
-  def get_dev_examples(self, data_dir):
+  def get_dev_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+        self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
 
-  def get_test_examples(self, data_dir):
+  def get_test_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
+        self._read_tsv(os.path.join(data_dir, "test.tsv"),read_range=read_range), "test")
 
   def get_labels(self):
     """See base class."""
@@ -148,20 +153,20 @@ class MrpcProcessor(DataProcessor):
 class REProcessor(DataProcessor):
   """Processor for the MRPC data set (GLUE version)."""
 
-  def get_train_examples(self, data_dir):
+  def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
+        self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
 
-  def get_dev_examples(self, data_dir):
+  def get_dev_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+        self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
 
-  def get_test_examples(self, data_dir):
+  def get_test_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
+        self._read_tsv(os.path.join(data_dir, "test.tsv"),read_range=read_range), "test")
 
   def get_labels(self):
     """See base class."""
@@ -174,40 +179,6 @@ class REProcessor(DataProcessor):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[0])
       label = tokenization.convert_to_unicode(line[1])
-      examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
-    return examples
-
-
-class DeepLocProcessor(DataProcessor):
-  """Processor for the MRPC data set (GLUE version)."""
-
-  def get_train_examples(self, data_dir):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
-
-  def get_dev_examples(self, data_dir):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
-
-  def get_test_examples(self, data_dir):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
-
-  def get_labels(self):
-    """See base class."""
-    return ["0", "1"]
-
-  def _create_examples(self, lines, set_type):
-    """Creates examples for the training and dev sets."""
-    examples = []
-    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
-      guid = "%s-%s" % (set_type, i)
-      text_a = tokenization.convert_to_unicode(line[1])
-      label = tokenization.convert_to_unicode(line[0])
       examples.append(
           InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
     return examples
@@ -345,7 +316,7 @@ def file_based_convert_examples_to_features(
 
 
 def file_based_input_fn_builder(input_file, seq_length, is_training,
-                                drop_remainder):
+                                drop_remainder, shards_folder=None):
   """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
   name_to_features = {
@@ -376,7 +347,12 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 
     # For training, we want a lot of parallel reading and shuffling.
     # For eval, we want no shuffling and parallel reading doesn't matter.
-    d = tf.data.TFRecordDataset(input_file)
+    if shards_folder:
+        import re
+        file_name = input_file.split("/")[-1]
+        d = tf.data.Dataset.from_tensor_slices([shard_folder+"/"+file for file in tf.io.gfile.listdir(shards_folder) if re.match(file_name+"_\d+",file)])
+    else:
+        d = tf.data.TFRecordDataset(input_file)
     if is_training:
       d = d.repeat()
       d = d.shuffle(buffer_size=100)

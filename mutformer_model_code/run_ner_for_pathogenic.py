@@ -265,7 +265,7 @@ def file_based_convert_examples_to_features(
 
 
 def file_based_input_fn_builder(input_file, seq_length, is_training,
-                                drop_remainder):
+                                drop_remainder,shards_folder = None):
     """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
     name_to_features = {
@@ -297,7 +297,14 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 
         # For training, we want a lot of parallel reading and shuffling.
         # For eval, we want no shuffling and parallel reading doesn't matter.
-        d = tf.data.TFRecordDataset(input_file)
+        if shards_folder:
+            import re
+            file_name = input_file.split("/")[-1]
+            d = tf.data.Dataset.from_tensor_slices(
+                [shard_folder + "/" + file for file in tf.io.gfile.listdir(shards_folder) if
+                 re.match(file_name + "_\d+", file)])
+        else:
+            d = tf.data.TFRecordDataset(input_file)
         if is_training:
             d = d.repeat()
             d = d.shuffle(buffer_size=100)
