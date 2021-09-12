@@ -16,11 +16,11 @@ mutformer large (Same sized transformer as bert-base) | 12 | 768 | 3072 | 1024 |
 
 ### Pretraining:
 
-Under the folder titled "mutformer_pretraining," first open "mutformer pretraining-data generation (with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options:Hardward Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
+Under the folder titled "mutformer_pretraining," first open "mutformer pretraining-data generation (with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardward Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
 
-Once the data generation has begun, open "mutformer run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options:Hardward Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
+Once the data generation has begun, open "mutformer run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardward Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
 
-Finally, open "mutformer run_pretraining-run eval.ipynb" and run all the code segments there (if using colab, runtime options:Hardward Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, open "mutformer run_pretraining-run eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardward Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
 
 You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle evaluating multiple models at once.
