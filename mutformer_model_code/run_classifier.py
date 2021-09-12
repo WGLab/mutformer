@@ -28,7 +28,7 @@ import tensorflow as tf
 import metric_functions
 from tensorflow.contrib.framework.python.framework import checkpoint_utils
 from tensorflow.contrib.framework import assign_from_checkpoint_fn
-
+from tqdm import tqdm
 
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
@@ -105,7 +105,7 @@ class DataProcessor(object):
     with tf.gfile.Open(input_file, "r") as f:
       reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
       lines = []
-      for line in reader:
+      for line in tqdm(reader,"reading tsv"):
         lines.append(line)
       return lines
 
@@ -136,7 +136,7 @@ class MrpcProcessor(DataProcessor):
   def _create_examples(self, lines, set_type):
     """Creates examples for the training and dev sets."""
     examples = []
-    for (i, line) in enumerate(lines):
+    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[3])
       text_b = tokenization.convert_to_unicode(line[4])
@@ -170,7 +170,7 @@ class REProcessor(DataProcessor):
   def _create_examples(self, lines, set_type):
     """Creates examples for the training and dev sets."""
     examples = []
-    for (i, line) in enumerate(lines):
+    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[0])
       label = tokenization.convert_to_unicode(line[1])
@@ -204,7 +204,7 @@ class DeepLocProcessor(DataProcessor):
   def _create_examples(self, lines, set_type):
     """Creates examples for the training and dev sets."""
     examples = []
-    for (i, line) in enumerate(lines):
+    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[1])
       label = tokenization.convert_to_unicode(line[0])

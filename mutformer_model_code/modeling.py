@@ -201,9 +201,6 @@ class BertModel(object):
             initializer_range=config.initializer_range,
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
-        print("embedding shape:", self.embedding_output.shape)
-
-        print("embedding shape:",self.embedding_output.shape)
       with tf.variable_scope("encoder"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
         # mask of shape [batch_size, seq_length, seq_length] which is used
@@ -360,9 +357,7 @@ class BertModelModified(object):
             initializer_range=config.initializer_range,
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
-        print("embedding shape:", self.embedding_output.shape)
         self.embedding_output = two_convs(self.embedding_output, config.hidden_size, config.hidden_dropout_prob)
-        print("embedding shape:",self.embedding_output.shape)
       with tf.variable_scope("encoder"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
         # mask of shape [batch_size, seq_length, seq_length] which is used
