@@ -1,5 +1,5 @@
 # mutformer
-mutformer is a modification of the BERT NLP model to predict the pathogenicity of Single Nucleotide Polymorphisms (SNPs). The embedding strategy and transofrmer body were kept, but in order to properly apply BERT to protein contexts, two convolutions aftre the embeddings were used the acheive the effect of an "adaptive vocabulary." A total of 5 models were trained:
+mutformer is a modification of the BERT NLP model to predict the pathogenicity of Single Nucleotide Polymorphisms (SNPs). We kept the original embedding strategy and transformer body, but in order to best apply BERT to protein contexts, we used convolutions to achieve an "adaptive vocabulary" with multiple amino acid patterns as "words." A total of 5 models were trained:
 
 Model Name | Hidden Layers | Hidden Size | Intermediate Size | Input length | # of parameters | Download link
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
@@ -9,18 +9,18 @@ mutformer small | 8 | 768 | 3072 | 1024 | ~62M
 mutformer medium | 10 | 770 | 3072 | 1024 | ~76M
 mutformer large (Same sized transformer as bert-base) | 12 | 768 | 3072 | 1024 | ~86M
 
-
+Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the mutformer models are the actual models using the modified architecture.
 
 
 ## To run mutformer:
 
 ### Pretraining:
 
-Under the folder titled "mutformer_pretraining," first open "mutformer pretraining-data generation (with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardward Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
+Under the folder titled "mutformer_pretraining," first open "mutformer pretraining-data generation (with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
 
-Once the data generation has begun, open "mutformer run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardward Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
+Once the data generation has begun, open "mutformer run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
 
-Finally, open "mutformer run_pretraining-run eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardward Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, open "mutformer run_pretraining-run eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
 
 You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle evaluating multiple models at once.
@@ -29,11 +29,11 @@ You can make multiple copies of the data generation and run_pretraining scripts 
 
 ----
 
-## Input Data format guidlines:
+## Input Data format guidelines:
 
 ### General format:
 
-Each residue in each sequence should be seperated by a space, and to denote the actual start and finish of each entire sequence, a "B" should be placed at the start of each sequence and a "J" at the end of the sequence prior to trimming/splitting.
+Each residue in each sequence should be separated by a space, and to denote the actual start and finish of each entire sequence, a "B" should be placed at the start of each sequence and a "J" at the end of the sequence prior to trimming/splitting.
 
 for pretraining, datasets should be split into "train.txt", "eval.txt", and "test.txt"
 for finetuning, datasets should be split into "train.tsv", "dev.tsv", and "test.tsv"
