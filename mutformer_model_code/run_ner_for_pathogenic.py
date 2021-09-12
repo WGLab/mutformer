@@ -102,32 +102,37 @@ class DataProcessor(object):
         raise NotImplementedError()
 
     @classmethod
-    def _read_tsv(cls, input_file, quotechar=None):
+    def _read_tsv(cls, input_file, read_range=None,quotechar=None):
         """Reads a tab separated value file."""
         with tf.gfile.Open(input_file, "r") as f:
-            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
-            lines = []
-            for line in tqdm(reader,"reading tsv"):
-                lines.append(line)
-            return lines
+          reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+          lines = []
+          for n,line in enumerate(tqdm(reader,"reading tsv")):
+            if read_range:
+                if n<read_range[0]:
+                    continue
+                elif n>=read_range[1]:
+                    break
+            lines.append(line)
+          return lines
 
 class NERProcessor(DataProcessor):
     """Processor for the ner data set (GLUE version)."""
 
-    def get_train_examples(self, data_dir):
+    def get_train_examples(self, data_dir, read_range=None):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
+            self._read_tsv(os.path.join(data_dir, "train.tsv"), read_range=read_range), "train")
 
-    def get_dev_examples(self, data_dir):
+    def get_dev_examples(self, data_dir, read_range=None):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+            self._read_tsv(os.path.join(data_dir, "dev.tsv"), read_range=read_range), "dev")
 
-    def get_test_examples(self, data_dir):
+    def get_test_examples(self, data_dir, read_range=None):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
+            self._read_tsv(os.path.join(data_dir, "test.tsv"), read_range=read_range), "test")
 
     def get_labels(self):
         """See base class."""
