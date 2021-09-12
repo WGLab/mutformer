@@ -27,7 +27,7 @@ You can make multiple copies of the data generation and run_pretraining scripts 
 
 ### Finetuning
 
-----
+not written yet
 
 ## Input Data format guidelines:
 
