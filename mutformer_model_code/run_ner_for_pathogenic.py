@@ -305,9 +305,13 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
         if shards_folder:
             import re
             file_name = input_file.split("/")[-1]
-            d = tf.data.Dataset.from_tensor_slices(
-                [shard_folder + "/" + file for file in tf.io.gfile.listdir(shards_folder) if
-                 re.match(file_name + "_\d+", file)])
+            shards = [shard_folder + "/" + file for file in tf.io.gfile.listdir(shards_folder) if
+                      re.match(file_name + "_\d+", file)]
+            shards = sorted(shards, key=lambda shard: int(shard.split("_")[-1]))
+            print("USING SHARDS:")
+            for shard in shards:
+                print(shard)
+            d = tf.data.Dataset.from_tensor_slices(shards)
         else:
             d = tf.data.TFRecordDataset(input_file)
         if is_training:
