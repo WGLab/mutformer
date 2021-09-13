@@ -350,7 +350,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
     if shards_folder:
         import re
         file_name = input_file.split("/")[-1]
-        shards = [shard_folder + "/" + file for file in tf.io.gfile.listdir(shards_folder) if
+        shards = [shards_folder + "/" + file for file in tf.io.gfile.listdir(shards_folder) if
                   re.match(file_name + "_\d+", file)]
         shards = sorted(shards,key=lambda shard:int(shard.split("_")[-1]))
         print("USING SHARDS:")
