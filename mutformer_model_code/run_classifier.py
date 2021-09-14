@@ -616,6 +616,10 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
                 labels=ids_int,
                 predictions=predictions, name="acc")
 
+            AUC = tf.metrics.AUC(
+                labels=ids_int,
+                predictions=predictions, name="auc")
+
             dice = metric_functions.custom_metric(ids_1hot, logits,
                                                   custom_func=metric_functions.multiclass_f1_dice,
                                                   name="dice_f1")
@@ -631,6 +635,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
                 "multiclass dice/f1": dice,
                 "precision": precision,
                 "recall": recall,
+                "ROC AUC":AUC
             }
 
         eval_metrics = (metric_fn, [label_ids, logits])

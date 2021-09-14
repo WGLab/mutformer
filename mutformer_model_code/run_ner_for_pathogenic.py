@@ -577,24 +577,29 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
                 ner_ids_int = tf.reshape(ner_ids, [-1])
 
                 accuracy = tf.metrics.accuracy(
-                    labels=ner_ids_int,predictions=ner_predictions,
-                    name="acc", weights=ner_mask)
+                    labels=ids_int,
+                    predictions=predictions, name="acc")
 
-                dice = metric_functions.custom_metric(ner_ids_1hot, ner_logits,
+                AUC = tf.metrics.AUC(
+                    labels=ids_int,
+                    predictions=predictions, name="auc")
+
+                dice = metric_functions.custom_metric(ids_1hot, logits,
                                                       custom_func=metric_functions.multiclass_f1_dice,
-                                                      name="dice_f1",weights=ner_mask)
-                precision = metric_functions.custom_metric(ner_ids_1hot, ner_predictions_1hot,
+                                                      name="dice_f1")
+                precision = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                            custom_func=metric_functions.multiclass_precision,
-                                                           name="multiclass_precision",weights=ner_mask)
-                recall = metric_functions.custom_metric(ner_ids_1hot, ner_predictions_1hot,
+                                                           name="multiclass_precision")
+                recall = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                         custom_func=metric_functions.multiclass_recall,
-                                                        name="recall_multiclass",weights=ner_mask)
+                                                        name="recall_multiclass")
 
                 return {
                     "accuracy": accuracy,
                     "multiclass dice/f1": dice,
                     "precision": precision,
                     "recall": recall,
+                    "ROC AUC": AUC
                 }
 
             eval_metrics = (metric_fn, [label_ids, logits,mutation_masks])
