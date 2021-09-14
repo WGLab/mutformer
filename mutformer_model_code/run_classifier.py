@@ -618,7 +618,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
 
             AUC = tf.metrics.auc(
                 labels=ids_int,
-                predictions=predictions, name="auc")
+                predictions=logits[:,1], name="auc")
 
             dice = metric_functions.custom_metric(ids_1hot, logits,
                                                   custom_func=metric_functions.multiclass_f1_dice,
