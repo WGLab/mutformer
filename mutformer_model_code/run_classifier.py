@@ -616,7 +616,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
                 labels=ids_int,
                 predictions=predictions, name="acc")
 
-            AUC = tf.metrics.AUC(
+            AUC = tf.metrics.auc(
                 labels=ids_int,
                 predictions=predictions, name="auc")
 
