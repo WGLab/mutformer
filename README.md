@@ -1,7 +1,9 @@
 # mutformer
-mutformer is a modification of the BERT NLP model to predict the pathogenicity of Single Nucleotide Polymorphisms (SNPs). We kept the original embedding strategy and transformer body, but in order to best apply BERT to protein contexts, we used convolutions to achieve an "adaptive vocabulary" with multiple amino acid patterns as "words." A total of 5 models were trained:
+mutformer is a BERT NLP model with convolutions after the embeddings used to predict the pathogenicity of Single Nucleotide Polymorphisms (SNPs). The convolutions after the embeddings are used to enable the model to learn multi-amino acid "words" via an adaptive vocabulary for a more effective application to proteins.
 
-Model Name | Hidden Layers | Hidden Size | Intermediate Size | Input length | # of parameters | Download link
+For this project, a total of 5 models were trained:
+
+Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
 Orig BERT small | 8 | 768 | 3072 | 1024 | ~58M | https://drive.google.com/drive/folders/1dJwSPWOU8VVLwQbe8UlxSLyAiJqCWszn?usp=sharing
 Orig BERT medium | 10 | 770 | 3072 | 1024 | ~72M | https://drive.google.com/drive/folders/1--nJNAwCB5weLH8NclNYJsrYDx2DZUhj?usp=sharing
@@ -16,18 +18,38 @@ Orig BERT small and Orig BERT medium use the original BERT model for comparison 
 
 ### Pretraining:
 
-Under the folder titled "mutformer_pretraining," first open "mutformer pretraining-data generation (with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
+Under the folder titled "mutformer_pretraining," first open "mutformer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
 
-Once the data generation has begun, open "mutformer run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
+Once the data generation has begun, open "mutformer_run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
 
-Finally, open "mutformer run_pretraining-run eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, open "mutformer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
 
 You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle evaluating multiple models at once.
 
+To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “mutformer_processing_and_viewing_pretraining_results.”
+
 ### Finetuning
 
-not written yet
+For finetuning, there is only one set of files for three tasks, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, RE for single sequence strategy, and NER for pre residue strategy).
+
+Under the folder titled "mutformer_finetraining," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
+
+Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
+
+Finally, alongside running mutformer_run_finetuning "mutformer_finetuning_benchmark_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+
+To view finetuning graphs or plotting ROC curves for the predictions, use the notebook titled “mutformer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
+
+## Model top performances for Pathogenicity Prediction:
+
+Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
+-----------|---------------
+Orig BERT small | 0.845
+Orig BERT medium | 0.876
+mutformer small | 0.931
+mutformer medium | 0.932
+mutformer large | 0.933
 
 ## Input Data format guidelines:
 
@@ -102,3 +124,6 @@ Example file:
 1    asdf    asdf    L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T
 0    asdf    asdf    L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L
 ```
+
+
+
