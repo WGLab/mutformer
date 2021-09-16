@@ -31,7 +31,7 @@ To view pretraining graphs or download the checkpoints from GCS, use the noteboo
 
 ### Finetuning
 
-For finetuning, there is only one set of files for three tasks, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, RE for single sequence strategy, and NER for pre residue strategy).
+For finetuning, there is only one set of files for three modes, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, RE for single sequence strategy, and NER for pre residue strategy).
 
 Under the folder titled "mutformer_finetraining," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
 
@@ -76,7 +76,8 @@ L V L E G R V G E A I E T T Q R F Y P G L L E H N P N L L F M L K C R Q F V E M 
 G T D S E V R S L S S R S P K S Q D S Y P G S P S L S F A R V D D Y L H J
 ```
 
-### Single Sequence Classification (RE)
+### Finetuning
+#### Single Sequence Classification (RE)
 
 The format should be a tsv file with each line containing (tab delimited): 
 1.  mutated protein sequence
@@ -90,7 +91,7 @@ G Q F L L P L T Q E A C C V G L E A G I N P T D H L I T A Y R A Q G F T F T R G 
 P A G L G S A R E T Q A Q A C P Q E G T E A H G A R L G P S I E D K G S G D P F G R Q R L K A E E M D T E D R P E A S G V D    0
 ```
 
-### Per Residue Classification (NER)
+#### Per Residue Classification (NER)
 
 The format should be a tsv file with each line containing (tab delimited): 
 1.  mutated protein sequence
@@ -108,7 +109,7 @@ G K K G D V W R L G L L L L S L S Q G Q E C G E Y P V T I P    B B B B B B B B B
 E M C Q K L K F F K D T E I A K I K M E A K K K Y E K E L T    B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B    16
 ```
 
-### Paired Sequence Classification (MRPC)
+#### Paired Sequence Classification (MRPC)
 
 The format should be a tsv file with each line containing (tab delimited): 
 1.  label (1 for pathogenic and 0 for benign)
