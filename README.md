@@ -13,6 +13,10 @@ mutformer large (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | 
 
 Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the mutformer models are the actual models using the modified architecture.
 
+Best performing mutformer model for funtional effect prediction:
+
+https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
+
 
 ## To run mutformer:
 
