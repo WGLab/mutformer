@@ -1,5 +1,5 @@
 # mutformer
-mutformer is a BERT NLP model with convolutions after the embeddings used to predict the pathogenicity of Single Nucleotide Polymorphisms (SNPs). The convolutions after the embeddings are used to enable the model to learn multi-amino acid "words" via an adaptive vocabulary for a more effective application to proteins.
+mutformer is an application of the BERT (Bidirectional Encoder Representations from Transformers) NLP (Natural Language Processing) model with an added adaptive vocabulary to protein context, for the purpose of predicting the effect of missense mutations on protein function.
 
 For this project, a total of 5 models were trained:
 
