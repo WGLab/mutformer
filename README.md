@@ -64,7 +64,7 @@ During finetuning, whenever splitting was required, we placed the mutation at th
 
 ### Pretraining:
 
-We have included our pretraining data in this repository.
+We have included our pretraining data in this repository. (For now, google drive link: https://drive.google.com/drive/folders/1QlTx0iOS8aVKnD0fegkG5JOY6WGH9u_S?usp=sharing)
 
 The format should be a txt with each line containing one sequence. Each sequence should be trimmed/split to a maximum of a fixed length (in our case we used 1024 amino acids). 
 
