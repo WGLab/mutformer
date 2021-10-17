@@ -18,7 +18,7 @@ Best performing MutFormer model for funtional effect prediction:
 https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
 
 
-#### To download a full prediction of all possible missense proteins in the humane protenome, we have included a file as an asset called "hg19_mutformer.txt"
+#### To download a full prediction of all possible missense proteins in the humane proteome, we have included a file as an asset called "hg19_mutformer.zip" Alternatively, a google drive link: https://drive.google.com/file/d/1ObBEn-wcQwoebD7glx8bWiWILfzfnlIO/view?usp=sharing
 
 
 ## To run MutFormer:
@@ -71,7 +71,7 @@ During finetuning, whenever splitting was required, we placed the mutation at th
 
 ### Pretraining:
 
-We have included our pretraining data in this repository. (For now, google drive link: https://drive.google.com/drive/folders/1QlTx0iOS8aVKnD0fegkG5JOY6WGH9u_S?usp=sharing)
+#### We have included our pretraining data in this repository as an asset, called "pretraining_data.zip" Alternatively, a google drive link: https://drive.google.com/drive/folders/1QlTx0iOS8aVKnD0fegkG5JOY6WGH9u_S?usp=sharing
 
 The format should be a txt with each line containing one sequence. Each sequence should be trimmed/split to a maximum of a fixed length (in our case we used 1024 amino acids). 
 
