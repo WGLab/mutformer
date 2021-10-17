@@ -11,7 +11,7 @@ MutFormer small | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/
 MutFormer medium | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
 MutFormer large (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
 
-Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the MutFormer models are the actual models using the modified architecture.
+Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the MutFormer models the official models.
 
 Best performing MutFormer model for funtional effect prediction:
 
