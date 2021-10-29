@@ -139,6 +139,10 @@ Example file:
 # Citation
 
 If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
+
+> Jiang, T., Fang, L. & Wang, K. MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations. Preprint at https://arxiv.org/abs/2110.14746 (2021).
+
+Bibtex format: 
 ```
 @article{jiang2021mutformer,
     title={MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations}, 
@@ -147,3 +151,4 @@ If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.1
     year={2021}
 }
 ```
+
