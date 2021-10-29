@@ -136,4 +136,14 @@ Example file:
 
 
 
+# Citation
 
+If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
+```
+@article{jiang2021mutformer,
+    title={MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations}, 
+    author={Theodore Jiang and Li Fang and Kai Wang},
+    journal={arXiv preprint arXiv:2110.14746},
+    year={2021}
+}
+```
