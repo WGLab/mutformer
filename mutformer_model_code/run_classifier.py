@@ -33,7 +33,7 @@ from tqdm import tqdm
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
 
-  def __init__(self, guid, text_a, text_b=None, label=None):
+  def __init__(self, guid, text_a, text_b=None, label=None, preds=None):
     """Constructs a InputExample.
 
     Args:
@@ -49,19 +49,7 @@ class InputExample(object):
     self.text_a = text_a
     self.text_b = text_b
     self.label = label
-
-
-class PaddingInputExample(object):
-  """Fake example so the num input examples is a multiple of the batch size.
-
-  When running eval/predict on the TPU, we need to pad the number of examples
-  to be a multiple of the batch size, because the TPU requires a fixed batch
-  size. The alternative is to drop the last batch, which is bad because it means
-  the entire output data won't be generated.
-
-  We use this class instead of `None` because treating `None` as padding
-  battches could cause silent errors.
-  """
+    self.preds = preds
 
 
 class InputFeatures(object):
@@ -72,11 +60,13 @@ class InputFeatures(object):
                input_mask,
                segment_ids,
                label_id,
+               preds,
                is_real_example=True):
     self.input_ids = input_ids
     self.input_mask = input_mask
     self.segment_ids = segment_ids
     self.label_id = label_id
+    self.preds = preds
     self.is_real_example = is_real_example
 
 
@@ -146,8 +136,9 @@ class MrpcProcessor(DataProcessor):
       text_a = tokenization.convert_to_unicode(line[3])
       text_b = tokenization.convert_to_unicode(line[4])
       label = tokenization.convert_to_unicode(line[0])
+      preds = tokenization.convert_to_unicode(line[5])
       examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, preds=preds))
     return examples
 
 class REProcessor(DataProcessor):
@@ -193,11 +184,15 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         input_mask=[0] * max_seq_length,
         segment_ids=[0] * max_seq_length,
         label_id=0,
+        preds=[],
         is_real_example=False)
 
   label_map = {}
   for (i, label) in enumerate(label_list):
     label_map[label] = i
+
+  preds = example.preds
+  preds = [float(pred) for pred in preds.split()]
 
   tokens_a = tokenizer.tokenize(example.text_a)
   tokens_b = None
@@ -274,6 +269,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
     tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
     tf.logging.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
+    tf.logging.info("preds: %s" % " ".join([str(x) for x in preds]))
     tf.logging.info("label: %s (id = %d)" % (example.label, label_id))
 
   feature = InputFeatures(
@@ -281,6 +277,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
       input_mask=input_mask,
       segment_ids=segment_ids,
       label_id=label_id,
+      preds=preds,
       is_real_example=True)
   return feature
 
@@ -307,6 +304,7 @@ def file_based_convert_examples_to_features(
     features["input_mask"] = create_int_feature(feature.input_mask)
     features["segment_ids"] = create_int_feature(feature.segment_ids)
     features["label_ids"] = create_int_feature([feature.label_id])
+    features["preds"] = create_int_feature([feature.preds])
     features["is_real_example"] = create_int_feature(
         [int(feature.is_real_example)])
 
@@ -316,16 +314,26 @@ def file_based_convert_examples_to_features(
 
 
 def file_based_input_fn_builder(input_file, seq_length, is_training,
-                                drop_remainder, shards_folder=None):
+                                drop_remainder, shards_folder=None, pred_num=None):
   """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
-  name_to_features = {
-      "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
-      "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
-      "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
-      "label_ids": tf.FixedLenFeature([], tf.int64),
-      "is_real_example": tf.FixedLenFeature([], tf.int64),
-  }
+  if pred_num:
+      name_to_features = {
+          "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
+          "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
+          "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
+          "label_ids": tf.FixedLenFeature([], tf.int64),
+          "preds": tf.FixedLenFeature([pred_num],tf.int64),
+          "is_real_example": tf.FixedLenFeature([], tf.int64),
+      }
+  else:
+      name_to_features = {
+          "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
+          "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
+          "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
+          "label_ids": tf.FixedLenFeature([], tf.int64),
+          "is_real_example": tf.FixedLenFeature([], tf.int64),
+      }
 
   def _decode_record(record, name_to_features):
     """Decodes a record to a TensorFlow example."""
@@ -392,7 +400,7 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 
 def create_model(bert_config, model, is_training, input_ids, input_mask, segment_ids,
-                 labels, num_labels, use_one_hot_embeddings,weights):
+                 labels, num_labels, use_one_hot_embeddings,weights,preds=None):
   """Creates a classification model."""
   model = model(
       config=bert_config,
@@ -407,7 +415,19 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   #
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
-  output_layer = model.get_pooled_output()
+  output_layer = model.get_sequence_output()
+  if preds:
+      pred_layer = tf.layers.dense(
+                tf.constant(preds),
+                bert_config.hidden_size,
+                activation=tf.tanh,
+                kernel_initializer=create_initializer(bert_config.initializer_range))
+      combined_layer = tf.concat([output_layer,pred_layer],axis=-1)
+      output_layer = tf.layers.dense(
+                combined_layer,
+                bert_config.hidden_size,
+                activation=tf.tanh,
+                kernel_initializer=create_initializer(bert_config.initializer_range))
 
   hidden_size = output_layer.shape[-1].value
 
@@ -441,7 +461,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
 def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, weights=None,freezing=None,
                      yield_predictions=False,bert=modeling.BertModel, test_results_dir=None,weight_decay = 0.01,
-                     epsilon=1e-4,optim="adam",clip_grads=True):
+                     epsilon=1e-4,optim="adam",clip_grads=True,using_preds = False):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -460,12 +480,16 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
     input_mask = features["input_mask"]
     segment_ids = features["segment_ids"]
     label_ids = features["label_ids"]
+    if using_preds:
+        preds = features["preds"]
+    else:
+        preds = None
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
     (total_loss, per_example_loss, logits, probabilities) = create_model(
         bert_config, bert, is_training, input_ids, input_mask, segment_ids, label_ids,
-        num_labels, use_one_hot_embeddings,class_weights)
+        num_labels, use_one_hot_embeddings,class_weights,preds=preds)
 
     tvars = tf.trainable_variables()
     initialized_variable_names = {}
