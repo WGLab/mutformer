@@ -296,8 +296,6 @@ def file_based_convert_examples_to_features(
       f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
       return f
 
-    print("HERE")
-
     features = collections.OrderedDict()
     features["input_ids"] = create_int_feature(feature.input_ids)
     features["input_mask"] = create_int_feature(feature.input_mask)
@@ -305,8 +303,6 @@ def file_based_convert_examples_to_features(
     features["label_ids"] = create_int_feature([feature.label_id])
     features["preds"] = create_float_feature(feature.preds)
     features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
-
-    print("HERE2")
 
     tf_example = tf.train.Example(features=tf.train.Features(feature=features))
     writer.write(tf_example.SerializeToString())
