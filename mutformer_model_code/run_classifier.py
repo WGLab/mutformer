@@ -286,9 +286,12 @@ def file_based_convert_examples_to_features(
     feature = convert_single_example(ex_index, example, label_list,
                                      max_seq_length, tokenizer)
 
+
     def create_int_feature(values):
       f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
       return f
+
+    print("HERE")
 
     features = collections.OrderedDict()
     features["input_ids"] = create_int_feature(feature.input_ids)
@@ -298,6 +301,8 @@ def file_based_convert_examples_to_features(
     features["preds"] = create_int_feature([feature.preds])
     features["is_real_example"] = create_int_feature(
         [int(feature.is_real_example)])
+
+    printe("HERE2")
 
     tf_example = tf.train.Example(features=tf.train.Features(feature=features))
     writer.write(tf_example.SerializeToString())
