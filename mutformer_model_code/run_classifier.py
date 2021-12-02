@@ -306,7 +306,7 @@ def file_based_convert_examples_to_features(
     features["preds"] = create_float_feature(feature.preds)
     features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
 
-    printe("HERE2")
+    print("HERE2")
 
     tf_example = tf.train.Example(features=tf.train.Features(feature=features))
     writer.write(tf_example.SerializeToString())
@@ -323,7 +323,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
           "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
           "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
           "label_ids": tf.FixedLenFeature([], tf.int64),
-          "preds": tf.FixedLenFeature([pred_num],tf.int64),
+          "preds": tf.FixedLenFeature([pred_num],tf.float),
           "is_real_example": tf.FixedLenFeature([], tf.int64),
       }
   else:
