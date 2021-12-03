@@ -450,7 +450,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   print("shape1",output_layer.shape)
   if using_preds:
       pred_layer = tf.layers.dense(
-                tf.constant(preds),
+                preds,
                 bert_config.hidden_size,
                 activation=tf.tanh,
                 kernel_initializer=create_initializer(bert_config.initializer_range))
