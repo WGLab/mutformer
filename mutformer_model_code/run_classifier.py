@@ -13,19 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """BERT finetuning runner."""
-##aslkdjfhlkasjdhflkajshfklasjhdfkljashdfkljashdf
-
-
-
-
-
-
-
-
-
-##jfjfjf
-
-
 
 from __future__ import absolute_import
 from __future__ import division
@@ -444,7 +431,7 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 
 def create_model(bert_config, model, is_training, input_ids, input_mask, segment_ids,
-                 labels, num_labels, use_one_hot_embeddings,weights,preds=None):
+                 labels, num_labels, use_one_hot_embeddings,weights,using_preds=False,preds=None):
   """Creates a classification model."""
   model = model(
       config=bert_config,
@@ -460,8 +447,8 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
   output_layer = model.get_pooled_output()
-  print("shapejlkasfkjldsf1",output_layer.shape)
-  if preds:
+  print("shape1",output_layer.shape)
+  if using_preds:
       pred_layer = tf.layers.dense(
                 tf.constant(preds),
                 bert_config.hidden_size,
@@ -536,7 +523,7 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
 
     (total_loss, per_example_loss, logits, probabilities) = create_model(
         bert_config, bert, is_training, input_ids, input_mask, segment_ids, label_ids,
-        num_labels, use_one_hot_embeddings,class_weights,preds=preds)
+        num_labels, use_one_hot_embeddings,class_weights,using_preds=using_preds,preds=preds)
 
     tvars = tf.trainable_variables()
     initialized_variable_names = {}
