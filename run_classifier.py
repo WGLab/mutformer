@@ -296,8 +296,6 @@ def file_based_convert_examples_to_features(
       f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
       return f
 
-    print("HERE")
-
     features = collections.OrderedDict()
     features["input_ids"] = create_int_feature(feature.input_ids)
     features["input_mask"] = create_int_feature(feature.input_mask)
@@ -305,8 +303,6 @@ def file_based_convert_examples_to_features(
     features["label_ids"] = create_int_feature([feature.label_id])
     features["preds"] = create_float_feature(feature.preds)
     features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
-
-    print("HERE2")
 
     tf_example = tf.train.Example(features=tf.train.Features(feature=features))
     writer.write(tf_example.SerializeToString())
@@ -415,7 +411,8 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   #
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
-  output_layer = model.get_sequence_output()
+  output_layer = model.get_pooled_output()
+  print(output_layer.shape)
   if preds:
       pred_layer = tf.layers.dense(
                 tf.constant(preds),
@@ -428,7 +425,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
                 bert_config.hidden_size,
                 activation=tf.tanh,
                 kernel_initializer=create_initializer(bert_config.initializer_range))
-
+      print("shape2",output_layer.shape)
   hidden_size = output_layer.shape[-1].value
 
   output_weights = tf.get_variable(
