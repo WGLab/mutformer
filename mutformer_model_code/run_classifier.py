@@ -447,7 +447,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
   output_layer = model.get_pooled_output()
-  print(output_layer.shape)
+  print("shape1",output_layer.shape)
   if preds:
       pred_layer = tf.layers.dense(
                 tf.constant(preds),
