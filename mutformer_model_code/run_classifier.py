@@ -449,18 +449,21 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   output_layer = model.get_pooled_output()
   print("shape1",output_layer.shape)
   if using_preds:
-      pred_layer = tf.layers.dense(
-                preds,
-                bert_config.hidden_size,
-                activation=tf.tanh,
-                kernel_initializer=modeling.create_initializer(bert_config.initializer_range))
-      combined_layer = tf.concat([output_layer,pred_layer],axis=-1)
-      output_layer = tf.layers.dense(
-                combined_layer,
-                bert_config.hidden_size,
-                activation=tf.tanh,
-                kernel_initializer=modeling.create_initializer(bert_config.initializer_range))
-      print("shape2",output_layer.shape)
+      with tf.variable_scope("extra_data_layers"):
+          pred_layer = tf.layers.dense(
+                    preds,
+                    bert_config.hidden_size,
+                    activation=tf.tanh,
+                    kernel_initializer=modeling.create_initializer(bert_config.initializer_range),
+                    name="pred_dense")
+          combined_layer = tf.concat([output_layer,pred_layer],axis=-1)
+          output_layer = tf.layers.dense(
+                    combined_layer,
+                    bert_config.hidden_size,
+                    activation=tf.tanh,
+                    kernel_initializer=modeling.create_initializer(bert_config.initializer_range),
+                    name="combine_dense")
+          print("shape2",output_layer.shape)
   hidden_size = output_layer.shape[-1].value
 
   output_weights = tf.get_variable(
