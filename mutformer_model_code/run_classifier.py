@@ -354,7 +354,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
           "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
           "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
           "label_ids": tf.FixedLenFeature([], tf.int64),
-          "preds": tf.FixedLenFeature([pred_num],tf.float),
+          "preds": tf.FixedLenFeature([pred_num],tf.float64),
           "is_real_example": tf.FixedLenFeature([], tf.int64),
       }
   else:
