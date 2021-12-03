@@ -517,6 +517,8 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint,resto
     else:
         preds = None
 
+    print("step 1")
+
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
     (total_loss, per_example_loss, logits, probabilities) = create_model(
