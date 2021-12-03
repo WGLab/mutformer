@@ -453,13 +453,13 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
                 preds,
                 bert_config.hidden_size,
                 activation=tf.tanh,
-                kernel_initializer=create_initializer(bert_config.initializer_range))
+                kernel_initializer=modeling.create_initializer(bert_config.initializer_range))
       combined_layer = tf.concat([output_layer,pred_layer],axis=-1)
       output_layer = tf.layers.dense(
                 combined_layer,
                 bert_config.hidden_size,
                 activation=tf.tanh,
-                kernel_initializer=create_initializer(bert_config.initializer_range))
+                kernel_initializer=modeling.create_initializer(bert_config.initializer_range))
       print("shape2",output_layer.shape)
   hidden_size = output_layer.shape[-1].value
 
