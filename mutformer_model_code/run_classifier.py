@@ -107,8 +107,6 @@ class DataProcessor(object):
 
 
 class MrpcProcessor(DataProcessor):
-  """Processor for the MRPC data set (GLUE version)."""
-
   def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
@@ -141,8 +139,6 @@ class MrpcProcessor(DataProcessor):
     return examples
 
 class MrpcWithPredsProcessor(DataProcessor):
-  """Processor for the MRPC data set (GLUE version)."""
-
   def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
@@ -177,8 +173,6 @@ class MrpcWithPredsProcessor(DataProcessor):
 
 
 class REProcessor(DataProcessor):
-  """Processor for the MRPC data set (GLUE version)."""
-
   def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
