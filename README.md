@@ -137,6 +137,24 @@ Example file:
 0    asdf    asdf    L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L
 ```
 
+#### Paired Sequence Classification With External Data (MRPC_w_preds)
+
+The format should be a tsv file with each line containing (tab delimited): 
+1.  label (1 for pathogenic and 0 for benign)
+2.  comment/placeholder column
+3.  another comment/placeholder column
+4.  reference sequence
+5.  mutated sequence
+6.  predictions, seperated by spaces
+
+Example file:
+```
+1    asdf    asdf    D W A Y A A S K E S H A T L V F H N L L G E I D Q Q Y S R F    D W A Y A A S K E S H A T L V F Y N L L G E I D Q Q Y S R F    0.6 0.137 0.5 0.9812
+0    asdf    asdf    S A V P P F S C G V I S T L R S R E E G A V D K S Y C T L L    S A V P P F S C G V I S T L R S W E E G A V D K S Y C T L L    0.0 0.101 0.1 0.0001
+1    asdf    asdf    L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T    1.0 0.986 0.8 0.9995
+0    asdf    asdf    L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    0.0 0.012 0.0 0.0
+```
+
 
 
 
