@@ -13,7 +13,7 @@ MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86
 
 Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the MutFormer models the official models.
 
-Best performing MutFormer model for funtional effect prediction:
+Best performing MutFormer model for functional effect prediction:
 
 https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
 
@@ -48,7 +48,7 @@ Once the data generation has finished, open "MutFormer_finetuning_benchmark.ipyn
 
 Finally, alongside running MutFormer_run_finetuning "MutFormer_finetuning_benchmark_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
-To view finetuning graphs or plotting ROC curves for the predictions, use the notebook titled “MutFormer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
+To view finetuning graphs or plot ROC curves for the predictions, use the notebook titled “MutFormer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
 
 ## Model top performances for Pathogenicity Prediction:
 
@@ -145,7 +145,7 @@ The format should be a tsv file with each line containing (tab delimited):
 3.  another comment/placeholder column
 4.  reference sequence
 5.  mutated sequence
-6.  predictions, seperated by spaces
+6.  predictions, separated by spaces
 
 Example file:
 ```
@@ -173,4 +173,6 @@ Bibtex format:
     year={2021}
 }
 ```
+
+
 
