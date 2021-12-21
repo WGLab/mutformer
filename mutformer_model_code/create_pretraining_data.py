@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Create masked LM/next sentence masked_lm TF examples for BERT."""
-aslkdjflakdsjf
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
