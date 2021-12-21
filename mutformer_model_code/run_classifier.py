@@ -131,8 +131,8 @@ class MrpcProcessor(DataProcessor):
     examples = []
     for (i, line) in enumerate(tqdm(lines,"creating_examples")):
       guid = "%s-%s" % (set_type, i)
-      text_a = tokenization.convert_to_unicode(line[2])
-      text_b = tokenization.convert_to_unicode(line[3])
+      text_a = tokenization.convert_to_unicode(line[1])
+      text_b = tokenization.convert_to_unicode(line[2])
       label = tokenization.convert_to_unicode(line[0])
       examples.append(
           InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
@@ -163,10 +163,10 @@ class MrpcWithPredsProcessor(DataProcessor):
     examples = []
     for (i, line) in enumerate(tqdm(lines,"creating_examples")):
       guid = "%s-%s" % (set_type, i)
-      text_a = tokenization.convert_to_unicode(line[2])
-      text_b = tokenization.convert_to_unicode(line[3])
+      text_a = tokenization.convert_to_unicode(line[1])
+      text_b = tokenization.convert_to_unicode(line[2])
       label = tokenization.convert_to_unicode(line[0])
-      preds = tokenization.convert_to_unicode(line[4])
+      preds = tokenization.convert_to_unicode(line[3])
       examples.append(
           InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, preds=preds))
     return examples
