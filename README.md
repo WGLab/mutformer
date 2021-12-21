@@ -11,7 +11,7 @@ MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/fold
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
 MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
 
-Orig BERT small and Orig BERT medium use the original BERT model for comparison purposes, the MutFormer models the official models.
+MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models the official models.
 
 Best performing MutFormer model for functional effect prediction:
 
@@ -27,30 +27,30 @@ https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sha
 
 ### Pretraining:
 
-Under the folder titled "MutFormer_pretraining," first open "MutFormer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
+Under the folder titled "mutformer_pretraining," first open "mutformer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
 
-Once the data generation has begun, open "MutFormer_run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
+Once the data generation has begun, open "mutformer_run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
 
-Finally, open "MutFormer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, open "mutformer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
 
 You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle evaluating multiple models at once.
 
-To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “MutFormer_processing_and_viewing_pretraining_results.”
+To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “mutformer_processing_and_viewing_pretraining_results.”
 
 ### Finetuning
 
 For finetuning, there is only one set of files for three modes, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, RE for single sequence strategy, and NER for pre residue strategy).
 
-Under the folder titled "MutFormer_finetraining," first open "MutFormer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
+Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
 
-Once the data generation has finished, open "MutFormer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
+Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
 
-Finally, alongside running MutFormer_run_finetuning "MutFormer_finetuning_benchmark_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, alongside running mutformer_run_finetuning "mutformer_finetuning_benchmark_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
-To view finetuning graphs or plot ROC curves for the predictions, use the notebook titled “MutFormer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
+To view finetuning graphs or plot ROC curves for the predictions, use the notebook titled “mutformer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
 
-## Model top performances for Pathogenicity Prediction:
+## Model top performances on test set for Pathogenicity Prediction without external data:
 
 Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
 -----------|---------------
@@ -59,6 +59,12 @@ MutBERT10L | 0.876
 MutFormer8L | 0.931
 MutFormer10L | 0.932
 MutFormer12L | 0.933
+
+## MutFormer top performance on test set for Pathogenicity Prediction with external data (excluding varity and MVP):
+
+Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
+-----------|---------------
+MutFormer12L | 0.965
 
 ## Input Data format guidelines:
 
