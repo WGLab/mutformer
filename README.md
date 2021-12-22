@@ -147,7 +147,7 @@ The format should be a tsv file with each line containing (tab delimited):
 1.  label (1 for pathogenic and 0 for benign)
 3.  reference sequence
 4.  mutated sequence
-5.  predictions, separated by spaces
+5.  external data (float values separated by spaces)
 
 Example file:
 ```
