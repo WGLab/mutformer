@@ -129,9 +129,9 @@ E M C Q K L K F F K D T E I A K I K M E A K K K Y E K E L T    B B B B B B B B B
 #### Paired Sequence Classification (MRPC)
 
 The format should be a tsv file with each line containing (tab delimited): 
-1.  label (1 for pathogenic and 0 for benign)
-3.  reference sequence
-4.  mutated sequence
+1. label (1 for pathogenic and 0 for benign)
+2. reference sequence
+3. mutated sequence
 
 Example file:
 ```
@@ -144,10 +144,10 @@ Example file:
 #### Paired Sequence Classification With External Data (MRPC_w_ex_data)
 
 The format should be a tsv file with each line containing (tab delimited): 
-1.  label (1 for pathogenic and 0 for benign)
-3.  reference sequence
-4.  mutated sequence
-5.  external data (float values separated by spaces)
+1. label (1 for pathogenic and 0 for benign)
+2. reference sequence
+3. mutated sequence
+4. external data (float values separated by spaces)
 
 Example file:
 ```
