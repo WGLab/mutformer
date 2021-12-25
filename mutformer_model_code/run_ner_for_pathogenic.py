@@ -582,19 +582,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 ner_predictions_1hot = tf.one_hot(tf.cast(ner_predictions, tf.int32),depth=num_labels, axis=-1)
                 ner_ids_int = tf.reshape(ner_ids, [-1])
 
-                ner_mask = tf.cast(tf.reshape(ner_mask, [-1]),tf.float32)
-                ner_logits = tf.nn.softmax(tf.reshape(ner_logits, [-1, ner_logits.shape[-1]]),axis=-1)
-
-                ner_ids_1hot = tf.one_hot(tf.cast(ner_ids, tf.int32), depth=num_labels, axis=-1)
-                ner_ids_1hot = tf.reshape(ner_ids_1hot, [-1, ner_ids_1hot.shape[-1]])
-                ner_predictions = tf.argmax(ner_logits, axis=-1, output_type=tf.int32)
-                ner_predictions_1hot = tf.one_hot(tf.cast(ner_predictions, tf.int32),depth=num_labels, axis=-1)
-
-
-                dice_f1_div = metric_functions.multiclass_f1_dice(ner_logits, ner_ids_1hot,ner_mask)
-                recall_div = metric_functions.multiclass_recall(ner_predictions_1hot, ner_ids_1hot,ner_mask)
-                precision_div = metric_functions.multiclass_precision(ner_predictions_1hot, ner_ids_1hot,ner_mask)
-                acc_div = metric_functions.acc(ner_predictions, ner_ids_int,ner_mask)
 
                 accuracy = tf.metrics.accuracy(
                     labels=ner_ids_int,
