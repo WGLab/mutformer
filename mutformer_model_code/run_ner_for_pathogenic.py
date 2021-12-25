@@ -403,7 +403,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, mask, s
 def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, weights=None, freezing=None,
                      yield_predictions=False, bert=modeling.BertModel, test_results_dir=None, weight_decay=0.01,
-                     epsilon=1e-4, optim="adam", clip_grads=True):
+                     epsilon=1e-4, optim="adam", clip_grads=True,using_ex_data=False):
     """Returns `model_fn` closure for TPUEstimator."""
 
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
