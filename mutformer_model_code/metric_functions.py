@@ -141,7 +141,6 @@ def multiclass_f1_dice(predictions, labels, weights=None):
         predictions=predictions,
         labels=labels,
         weights=weights)
-    print(predictions.shape,labels.shape,weights.shape)
     tot_dice = 0
     for l in range(0, predictions.shape.as_list()[-1]):
         preds = tf.reshape(tf.slice(predictions,[0,l],[predictions.shape.as_list()[0],1]),[-1])
@@ -163,7 +162,6 @@ def acc(predictions, labels, weights=None): ## just normal accuracy (TP + TN)/(T
     correct = tf.cast(math_ops.equal(predictions,labels),tf.float32)
     correct=tf.reduce_sum(correct*weights)
     tot = tf.reduce_sum(weights)
-    print("acctot:",tot)
     return correct+smooth,tot+smooth
 
 def multiclass_recall(predictions, labels, weights=None):

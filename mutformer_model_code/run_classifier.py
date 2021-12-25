@@ -442,7 +442,6 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
   output_layer = model.get_pooled_output()
-  print("shape1",output_layer.shape)
   if using_ex_data:
       with tf.variable_scope("extra_data_layers"):
           pred_layer = tf.layers.dense(
@@ -458,7 +457,6 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
                     activation=tf.tanh,
                     kernel_initializer=modeling.create_initializer(bert_config.initializer_range),
                     name="combine_dense")
-          print("shape2",output_layer.shape)
   hidden_size = output_layer.shape[-1].value
 
   output_weights = tf.get_variable(
@@ -515,7 +513,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
     else:
         ex_data = None
 
-    print("step 1")
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
