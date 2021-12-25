@@ -400,10 +400,10 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, mask, s
         return (tot_loss, logits, probabilities)
 
 
-def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, restore_checkpoint, init_learning_rate,
+def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, weights=None, freezing=None,
                      yield_predictions=False, bert=modeling.BertModel, test_results_dir=None, weight_decay=0.01,
-                     epsilon=1e-4, optim="adam", clip_grads=True,using_ex_data=False,):
+                     epsilon=1e-4, optim="adam", clip_grads=True,using_ex_data=False,logging_dir=None):
     """Returns `model_fn` closure for TPUEstimator."""
 
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -532,36 +532,42 @@ def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, rest
                 }
 
             metrics = train_metrics(label_ids, logits, mutation_masks)
+            if logging_dir:
+                def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
+                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
+                        gs = gs[0]
+                        with tf.contrib.summary.always_record_summaries():
+                            tf.contrib.summary.scalar('train_loss', loss[0], step=gs)
+                            tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
+                            tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
+                            tf.contrib.summary.scalar('precision', prec[0], step=gs)
+                            tf.contrib.summary.scalar('recall', recall[0], step=gs)
+                            tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
 
-            def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
-                with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-                    gs = gs[0]
-                    with tf.contrib.summary.always_record_summaries():
-                        tf.contrib.summary.scalar('train_loss', loss[0], step=gs)
-                        tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
-                        tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
-                        tf.contrib.summary.scalar('precision', prec[0], step=gs)
-                        tf.contrib.summary.scalar('recall', recall[0], step=gs)
-                        tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
+                            return tf.contrib.summary.all_summary_ops()
 
-                        return tf.contrib.summary.all_summary_ops()
+                gs_t = tf.reshape(global_step, [1])
+                loss_t = tf.reshape(total_loss, [1])
+                lr_t = tf.reshape(learning_rate, [1])
+                acc_t = tf.reshape(metrics["accuracy"], [1])
+                precision_t = tf.reshape(metrics["precision"], [1])
+                recall_t = tf.reshape(metrics["recall"], [1])
+                f1_t = tf.reshape(metrics["dice_f1"], [1])
 
-            gs_t = tf.reshape(global_step, [1])
-            loss_t = tf.reshape(total_loss, [1])
-            lr_t = tf.reshape(learning_rate, [1])
-            acc_t = tf.reshape(metrics["accuracy"], [1])
-            precision_t = tf.reshape(metrics["precision"], [1])
-            recall_t = tf.reshape(metrics["recall"], [1])
-            f1_t = tf.reshape(metrics["dice_f1"], [1])
+                host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t, precision_t, recall_t, f1_t])
 
-            host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t, precision_t, recall_t, f1_t])
-
-            output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-                mode=mode,
-                loss=total_loss,
-                train_op=train_op,
-                scaffold_fn=scaffold_fn,
-                host_call=host_call)
+                output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+                    mode=mode,
+                    loss=total_loss,
+                    train_op=train_op,
+                    scaffold_fn=scaffold_fn,
+                    host_call=host_call)
+            else:
+                output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+                    mode=mode,
+                    loss=total_loss,
+                    train_op=train_op,
+                    scaffold_fn=scaffold_fn)
         elif mode == tf.estimator.ModeKeys.EVAL:
 
             def metric_fn(ner_ids, ner_logits, ner_mask):
