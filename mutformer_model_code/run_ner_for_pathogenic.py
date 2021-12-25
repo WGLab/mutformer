@@ -583,20 +583,20 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 ner_ids_int = tf.reshape(ner_ids, [-1])
 
                 accuracy = tf.metrics.accuracy(
-                    labels=ids_int,
-                    predictions=predictions, name="acc")
+                    labels=ner_ids_int,
+                    predictions=ner_predictions, name="acc")
 
                 AUC = tf.metrics.auc(
-                    labels=ids_int,
+                    labels=ner_ids_int,
                     predictions=logits[:,1], name="auc")
 
-                dice = metric_functions.custom_metric(ids_1hot, logits,
+                dice = metric_functions.custom_metric(ner_ids_1hot, logits,
                                                       custom_func=metric_functions.multiclass_f1_dice,
                                                       name="dice_f1")
-                precision = metric_functions.custom_metric(ids_1hot, predictions_1hot,
+                precision = metric_functions.custom_metric(ner_ids_1hot, ner_predictions_1hot,
                                                            custom_func=metric_functions.multiclass_precision,
                                                            name="multiclass_precision")
-                recall = metric_functions.custom_metric(ids_1hot, predictions_1hot,
+                recall = metric_functions.custom_metric(ner_ids_1hot, predictioner_predictions_1hotns_1hot,
                                                         custom_func=metric_functions.multiclass_recall,
                                                         name="recall_multiclass")
 
