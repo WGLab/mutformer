@@ -534,6 +534,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
 
             metrics = train_metrics(label_ids, logits, mutation_masks)
             if logging_dir:
+                print("USING logging_dir")
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     with tf.contrib.summary.create_file_writer(logging_dir).as_default():
                         gs = gs[0]
@@ -620,6 +621,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
             eval_metrics = (metric_fn, [label_ids, logits,mutation_masks])
 
             if yield_predictions:
+                print("USING EVALUATE_WHILE_PREDICT")
                 def host_call_fn(probs, labels, masks):
                     with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                         with tf.contrib.summary.always_record_summaries():
