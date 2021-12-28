@@ -102,6 +102,11 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
             masked_lm_predictions = tf.argmax(masked_lm_log_probs, axis=-1, output_type=tf.int32)
             masked_lm_predictions_1hot = tf.one_hot(tf.cast(masked_lm_predictions, tf.int32), depth=bert_config.vocab_size, axis=-1)
             masked_lm_ids_int = tf.reshape(masked_lm_ids, [-1])
+            print("logits",masked_lm_logits)
+            print("preds",masked_lm_predictions)
+            print("ids",masked_lm_ids_int)
+            print("ids1hot",masked_lm_ids_1hot)
+            print("weights",masked_lm_weights)
 
             dice_f1_div = metric_functions.multiclass_f1_dice(masked_lm_logits,masked_lm_ids_1hot,masked_lm_weights)
             recall_div = metric_functions.multiclass_recall(masked_lm_predictions_1hot, masked_lm_ids_1hot, masked_lm_weights)
