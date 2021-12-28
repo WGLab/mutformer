@@ -431,6 +431,12 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
             bert_config, bert, is_training, input_ids, input_mask, mutation_masks,
             segment_ids, label_ids, num_labels, use_one_hot_embeddings, class_weights)
 
+        ##apply mask
+        mutation_masks = tf.cast(mutation_masks,tf.float32)
+        logits = tf.reduce_sum(logits * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1),
+        probabilities = tf.reduce_sum(probabilities * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1),
+        labels = tf.reduce_sum(tf.cast(label_ids, tf.float32) * tf.cast(mutation_masks, tf.float32), axis=1)
+
         tvars = tf.trainable_variables()
         initialized_variable_names = {}
         if use_tpu:
@@ -503,9 +509,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 num_warmup_steps, use_tpu, tvars=not_frozen if freezing else None,
                 weight_decay=weight_decay, epsilon=epsilon, optimizer_name=optim, clip=clip_grads)
 
-            def train_metrics(ner_ids, ner_logits, ner_mask):
+            def train_metrics(ner_ids, ner_logits):
                 """Computes the loss and accuracy of the model."""
-                ner_mask = tf.cast(tf.reshape(ner_mask, [-1]),tf.float32)
                 ner_logits = tf.nn.softmax(tf.reshape(ner_logits, [-1, ner_logits.shape[-1]]),axis=-1)
 
                 ner_ids_1hot = tf.one_hot(tf.cast(ner_ids, tf.int32), depth=num_labels, axis=-1)
@@ -515,10 +520,10 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
 
                 ner_ids_int = tf.reshape(ner_ids, [-1])
 
-                dice_f1_div = metric_functions.multiclass_f1_dice(ner_logits, ner_ids_1hot,ner_mask)
-                recall_div = metric_functions.multiclass_recall(ner_predictions_1hot, ner_ids_1hot,ner_mask)
-                precision_div = metric_functions.multiclass_precision(ner_predictions_1hot, ner_ids_1hot,ner_mask)
-                acc_div = metric_functions.acc(ner_predictions, ner_ids_int,ner_mask)
+                dice_f1_div = metric_functions.multiclass_f1_dice(ner_logits, ner_ids_1hot)
+                recall_div = metric_functions.multiclass_recall(ner_predictions_1hot, ner_ids_1hot)
+                precision_div = metric_functions.multiclass_precision(ner_predictions_1hot, ner_ids_1hot)
+                acc_div = metric_functions.acc(ner_predictions, ner_ids_int)
 
                 dice_f1 = dice_f1_div[0] / dice_f1_div[1]
                 recall = recall_div[0] / recall_div[1]
@@ -532,7 +537,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                     "accuracy": acc
                 }
 
-            metrics = train_metrics(label_ids, logits, mutation_masks)
+            metrics = train_metrics(labels, logits)
             if logging_dir:
                 print("USING logging_dir")
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
@@ -572,9 +577,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                     scaffold_fn=scaffold_fn)
         elif mode == tf.estimator.ModeKeys.EVAL:
 
-            def metric_fn(ner_ids, ner_logits, ner_mask):
+            def metric_fn(ner_ids, ner_logits):
                 """Computes the loss and accuracy of the model."""
-                ner_mask = tf.cast(tf.reshape(ner_mask, [-1]),tf.float32)
                 ner_logits = tf.nn.softmax(tf.reshape(ner_logits, [-1, ner_logits.shape[-1]]),
                                             axis=-1)
 
@@ -588,27 +592,22 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 accuracy = tf.metrics.accuracy(
                     labels=ner_ids_int,
                     predictions=ner_predictions,
-                    weights=ner_mask,
                     name="acc")
 
                 AUC = tf.metrics.auc(
                     labels=ner_ids_int,
                     predictions=ner_logits[:,1],
-                    weights=ner_mask,
                     name="auc")
 
                 dice = metric_functions.custom_metric(ner_logits, ner_ids_1hot,
                                                       custom_func=metric_functions.multiclass_f1_dice,
-                                                      name="dice_f1",
-                                                      weights=ner_mask)
+                                                      name="dice_f1")
                 precision = metric_functions.custom_metric(ner_predictions_1hot, ner_ids_1hot,
                                                            custom_func=metric_functions.multiclass_precision,
-                                                           name="multiclass_precision",
-                                                           weights=ner_mask)
+                                                           name="multiclass_precision")
                 recall = metric_functions.custom_metric(ner_predictions_1hot, ner_ids_1hot,
                                                         custom_func=metric_functions.multiclass_recall,
-                                                        name="recall_multiclass",
-                                                        weights=ner_mask)
+                                                        name="recall_multiclass")
 
                 return {
                     "accuracy": accuracy,
@@ -618,21 +617,20 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                     "ROC AUC": AUC
                 }
 
-            eval_metrics = (metric_fn, [label_ids, logits,mutation_masks])
+            eval_metrics = (metric_fn, [labels, logits])
 
             if yield_predictions:
                 print("USING EVALUATE_WHILE_PREDICT")
-                def host_call_fn(probs, labels, masks):
+                def host_call_fn(probs, labels):
                     with tf.contrib.summary.create_file_writer(test_results_dir).as_default():
                         with tf.contrib.summary.always_record_summaries():
                             for n in range(0, probs.shape.as_list()[0]):
-                                positive_class_probs = probs[n,:,1] * tf.cast(masks[n],tf.float32)
-                                tf.contrib.summary.scalar('probabilities', tf.reduce_sum(positive_class_probs), step=n)
-                                tf.contrib.summary.scalar('labels', tf.reduce_sum(tf.cast(labels[n],tf.float32) * tf.cast(masks[n],tf.float32)), step=n)
+                                tf.contrib.summary.scalar('probabilities', probs[n,:,1], step=n)
+                                tf.contrib.summary.scalar('labels', labels[n], step=n)
 
                             return tf.contrib.summary.all_summary_ops()
 
-                host_call = (host_call_fn, [probabilities, label_ids, mutation_masks])
+                host_call = (host_call_fn, [probabilities, labels])
 
                 output_spec = tf.contrib.tpu.TPUEstimatorSpec(
                     mode=mode,
@@ -650,8 +648,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
         else:
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
                 mode=mode,
-                predictions={"probabilities": tf.reduce_sum(probabilities[:,:,1] * tf.cast(mutation_masks,tf.float32),axis=1),
-                             "labels": tf.reduce_sum(tf.cast(label_ids,tf.float32) * tf.cast(mutation_masks,tf.float32),axis=1)},
+                predictions={"probabilities": probabilities,
+                             "labels": labels},
                 scaffold_fn=scaffold_fn)
         return output_spec
 
