@@ -45,8 +45,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
         (1.0 - is_warmup) * learning_rate + is_warmup * warmup_learning_rate)
 
   # It is recommended that you use this optimizer for fine tuning, since this
-  # is how the model was trained (note that the Adam m and v momentum variables
-  # are NOT loaded from init_checkpoint).
+  # is how the model was trained (note that the Adam m/v variables are NOT
+  # loaded from init_checkpoint.)
   if optimizer_name=="adam":
       optimizer = AdamWeightDecayOptimizer(
           learning_rate=learning_rate,

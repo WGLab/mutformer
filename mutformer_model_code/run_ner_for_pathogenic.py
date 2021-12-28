@@ -270,7 +270,7 @@ def file_based_convert_examples_to_features(
 
 
 def file_based_input_fn_builder(input_file, seq_length, is_training,
-                                drop_remainder,shards_folder = None,pred_num=None):
+                                drop_remainder,shards_folder = None):
     """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
     name_to_features = {
@@ -400,11 +400,10 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, mask, s
         return (tot_loss, logits, probabilities)
 
 
-
-def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoint, init_learning_rate,
+def model_fn_builder(bert_config, logging_dir, num_labels, init_checkpoint, restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, weights=None, freezing=None,
                      yield_predictions=False, bert=modeling.BertModel, test_results_dir=None, weight_decay=0.01,
-                     epsilon=1e-4, optim="adam", clip_grads=True,using_ex_data=False,logging_dir=None):
+                     epsilon=1e-4, optim="adam", clip_grads=True):
     """Returns `model_fn` closure for TPUEstimator."""
 
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -533,42 +532,36 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 }
 
             metrics = train_metrics(label_ids, logits, mutation_masks)
-            if logging_dir:
-                def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
-                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-                        gs = gs[0]
-                        with tf.contrib.summary.always_record_summaries():
-                            tf.contrib.summary.scalar('train_loss', loss[0], step=gs)
-                            tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
-                            tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
-                            tf.contrib.summary.scalar('precision', prec[0], step=gs)
-                            tf.contrib.summary.scalar('recall', recall[0], step=gs)
-                            tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
 
-                            return tf.contrib.summary.all_summary_ops()
+            def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
+                with tf.contrib.summary.create_file_writer(logging_dir).as_default():
+                    gs = gs[0]
+                    with tf.contrib.summary.always_record_summaries():
+                        tf.contrib.summary.scalar('train_loss', loss[0], step=gs)
+                        tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
+                        tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
+                        tf.contrib.summary.scalar('precision', prec[0], step=gs)
+                        tf.contrib.summary.scalar('recall', recall[0], step=gs)
+                        tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
 
-                gs_t = tf.reshape(global_step, [1])
-                loss_t = tf.reshape(total_loss, [1])
-                lr_t = tf.reshape(learning_rate, [1])
-                acc_t = tf.reshape(metrics["accuracy"], [1])
-                precision_t = tf.reshape(metrics["precision"], [1])
-                recall_t = tf.reshape(metrics["recall"], [1])
-                f1_t = tf.reshape(metrics["dice_f1"], [1])
+                        return tf.contrib.summary.all_summary_ops()
 
-                host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t, precision_t, recall_t, f1_t])
+            gs_t = tf.reshape(global_step, [1])
+            loss_t = tf.reshape(total_loss, [1])
+            lr_t = tf.reshape(learning_rate, [1])
+            acc_t = tf.reshape(metrics["accuracy"], [1])
+            precision_t = tf.reshape(metrics["precision"], [1])
+            recall_t = tf.reshape(metrics["recall"], [1])
+            f1_t = tf.reshape(metrics["dice_f1"], [1])
 
-                output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-                    mode=mode,
-                    loss=total_loss,
-                    train_op=train_op,
-                    scaffold_fn=scaffold_fn,
-                    host_call=host_call)
-            else:
-                output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-                    mode=mode,
-                    loss=total_loss,
-                    train_op=train_op,
-                    scaffold_fn=scaffold_fn)
+            host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t, precision_t, recall_t, f1_t])
+
+            output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+                mode=mode,
+                loss=total_loss,
+                train_op=train_op,
+                scaffold_fn=scaffold_fn,
+                host_call=host_call)
         elif mode == tf.estimator.ModeKeys.EVAL:
 
             def metric_fn(ner_ids, ner_logits, ner_mask):
@@ -583,31 +576,23 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 ner_predictions_1hot = tf.one_hot(tf.cast(ner_predictions, tf.int32),depth=num_labels, axis=-1)
                 ner_ids_int = tf.reshape(ner_ids, [-1])
 
-
                 accuracy = tf.metrics.accuracy(
-                    labels=ner_ids_int,
-                    predictions=ner_predictions,
-                    weights=ner_mask,
-                    name="acc")
+                    labels=ids_int,
+                    predictions=predictions, name="acc")
 
                 AUC = tf.metrics.auc(
-                    labels=ner_ids_int,
-                    predictions=ner_logits[:,1],
-                    weights=ner_mask,
-                    name="auc")
+                    labels=ids_int,
+                    predictions=logits[:,1], name="auc")
 
-                dice = metric_functions.custom_metric(ner_logits, ner_ids_1hot,
+                dice = metric_functions.custom_metric(ids_1hot, logits,
                                                       custom_func=metric_functions.multiclass_f1_dice,
-                                                      name="dice_f1",
-                                                      weights=ner_mask)
-                precision = metric_functions.custom_metric(ner_predictions_1hot, ner_ids_1hot,
+                                                      name="dice_f1")
+                precision = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                            custom_func=metric_functions.multiclass_precision,
-                                                           name="multiclass_precision",
-                                                           weights=ner_mask)
-                recall = metric_functions.custom_metric(ner_predictions_1hot, ner_ids_1hot,
+                                                           name="multiclass_precision")
+                recall = metric_functions.custom_metric(ids_1hot, predictions_1hot,
                                                         custom_func=metric_functions.multiclass_recall,
-                                                        name="recall_multiclass",
-                                                        weights=ner_mask)
+                                                        name="recall_multiclass")
 
                 return {
                     "accuracy": accuracy,
@@ -625,8 +610,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                         with tf.contrib.summary.always_record_summaries():
                             for n in range(0, probs.shape.as_list()[0]):
                                 positive_class_probs = probs[n,:,1] * tf.cast(masks[n],tf.float32)
-                                tf.contrib.summary.scalar('probabilities', tf.reduce_sum(positive_class_probs), step=n)
-                                tf.contrib.summary.scalar('labels', tf.reduce_sum(tf.cast(labels[n],tf.float32) * tf.cast(masks[n],tf.float32)), step=n)
+                                tf.contrib.summary.scalar('probability', tf.reduce_sum(positive_class_probs), step=n)
+                                tf.contrib.summary.scalar('label', tf.reduce_sum(tf.cast(labels[n],tf.float32) * tf.cast(masks[n],tf.float32)), step=n)
 
                             return tf.contrib.summary.all_summary_ops()
 
@@ -654,3 +639,76 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
         return output_spec
 
     return model_fn
+
+
+# This function is not used by this file but is still used by the Colab and
+# people who depend on it.
+def input_fn_builder(features, seq_length, is_training, drop_remainder):
+    """Creates an `input_fn` closure to be passed to TPUEstimator."""
+
+    all_input_ids = []
+    all_input_mask = []
+    all_segment_ids = []
+    all_label_ids = []
+
+    for feature in features:
+        all_input_ids.append(feature.input_ids)
+        all_input_mask.append(feature.input_mask)
+        all_segment_ids.append(feature.segment_ids)
+        all_label_ids.append(feature.label_id)
+
+    def input_fn(params):
+        """The actual input function."""
+        batch_size = params["batch_size"]
+
+        num_examples = len(features)
+
+        # This is for demo purposes and does NOT scale to large data sets. We do
+        # not use Dataset.from_generator() because that uses tf.py_func which is
+        # not TPU compatible. The right way to load data is with TFRecordReader.
+        d = tf.data.Dataset.from_tensor_slices({
+            "input_ids":
+                tf.constant(
+                    all_input_ids, shape=[num_examples, seq_length],
+                    dtype=tf.int32),
+            "input_mask":
+                tf.constant(
+                    all_input_mask,
+                    shape=[num_examples, seq_length],
+                    dtype=tf.int32),
+            "segment_ids":
+                tf.constant(
+                    all_segment_ids,
+                    shape=[num_examples, seq_length],
+                    dtype=tf.int32),
+            "label_ids":
+                tf.constant(all_label_ids, shape=[num_examples], dtype=tf.int32),
+        })
+
+        if is_training:
+            d = d.repeat()
+            d = d.shuffle(buffer_size=10000)
+
+        d = d.batch(batch_size=batch_size, drop_remainder=drop_remainder)
+        return d
+
+    return input_fn
+
+
+# This function is not used by this file but is still used by the Colab and
+# people who depend on it.
+def convert_examples_to_features(examples, label_list, max_seq_length,
+                                 tokenizer):
+    """Convert a set of `InputExample`s to a list of `InputFeatures`."""
+
+    features = []
+    for (ex_index, example) in enumerate(examples):
+        if ex_index % 10000 == 0:
+            tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
+
+        feature = convert_single_example(ex_index, example, label_list,
+                                         max_seq_length, tokenizer)
+
+        features.append(feature)
+    return features
+
