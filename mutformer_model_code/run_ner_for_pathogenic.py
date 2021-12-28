@@ -512,6 +512,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
             def train_metrics(ner_ids, ner_logits):
                 """Computes the loss and accuracy of the model."""
                 ner_logits = tf.nn.softmax(tf.reshape(ner_logits, [-1, ner_logits.shape[-1]]),axis=-1)
+                ner_ids = tf.cast(ner_ids,tf.float32)
 
                 ner_ids_1hot = tf.one_hot(tf.cast(ner_ids, tf.int32), depth=num_labels, axis=-1)
                 ner_ids_1hot = tf.reshape(ner_ids_1hot, [-1, ner_ids_1hot.shape[-1]])
@@ -581,6 +582,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
                 """Computes the loss and accuracy of the model."""
                 ner_logits = tf.nn.softmax(tf.reshape(ner_logits, [-1, ner_logits.shape[-1]]),
                                             axis=-1)
+                ner_ids = tf.cast(ner_ids, tf.float32)
 
                 ner_ids_1hot = tf.one_hot(tf.cast(ner_ids, tf.int32), depth=num_labels, axis=-1)
                 ner_ids_1hot = tf.reshape(ner_ids_1hot, [-1, ner_ids_1hot.shape[-1]])
