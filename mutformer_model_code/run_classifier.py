@@ -442,22 +442,25 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
   # If you want to use the token-level output, use model.get_sequence_output()
   # instead.
   output_layer = model.get_pooled_output()
+
+  hidden_size = output_layer.shape[-1].value
+
   if using_ex_data:
       with tf.variable_scope("extra_data_layers"):
           pred_layer = tf.layers.dense(
                     ex_data,
-                    bert_config.hidden_size,
+                    hidden_size,
                     activation=tf.tanh,
                     kernel_initializer=modeling.create_initializer(bert_config.initializer_range),
                     name="pred_dense")
           combined_layer = tf.concat([output_layer,pred_layer],axis=-1)
           output_layer = tf.layers.dense(
                     combined_layer,
-                    bert_config.hidden_size,
+                    hidden_size,
                     activation=tf.tanh,
                     kernel_initializer=modeling.create_initializer(bert_config.initializer_range),
                     name="combine_dense")
-  hidden_size = output_layer.shape[-1].value
+
 
   output_weights = tf.get_variable(
       "output_weights", [num_labels, hidden_size],
