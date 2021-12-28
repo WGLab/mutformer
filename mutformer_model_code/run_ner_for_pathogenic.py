@@ -433,8 +433,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, restore_checkpoin
 
         ##apply mask
         mutation_masks = tf.cast(mutation_masks,tf.float32)
-        logits = tf.reduce_sum(logits * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1),
-        probabilities = tf.reduce_sum(probabilities * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1),
+        logits = tf.reduce_sum(logits * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1)
+        probabilities = tf.reduce_sum(probabilities * tf.cast(tf.stack([mutation_masks for i in range(0,num_labels)],axis=-1), tf.float32), axis=1)
         labels = tf.reduce_sum(tf.cast(label_ids, tf.float32) * tf.cast(mutation_masks, tf.float32), axis=1)
 
         tvars = tf.trainable_variables()
