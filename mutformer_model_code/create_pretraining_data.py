@@ -43,6 +43,7 @@ flags.DEFINE_bool(
     "Whether to lower case the input text. Should be True for uncased "
     "models and False for cased models.")
 
+
 flags.DEFINE_bool(
     "do_whole_word_mask", False,
     "Whether to use whole word masking rather than per-WordPiece masking.")
