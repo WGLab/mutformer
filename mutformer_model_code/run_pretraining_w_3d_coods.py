@@ -1,4 +1,4 @@
-# coding=utf-8
+ # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@ import metric_functions
 
 def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, bert=modeling.BertModel):
+                     use_one_hot_embeddings, bert=modeling.MutFormer_3d_coods):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -42,22 +42,33 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
     masked_lm_positions = features["masked_lm_positions"]
     masked_lm_ids = features["masked_lm_ids"]
     masked_lm_weights = features["masked_lm_weights"]
-    coods_x = features["3dcood_x"]
-    coods_y = features["3dcood_y"]
-    coods_z = features["3dcood_z"]
+    coodss_x = features["3dcood_x"]
+    coodss_y = features["3dcood_y"]
+    coodss_z = features["3dcood_z"]
 
-    center_x = (tf.minimum([x for x in coods_x if x!=1e8])+tf.maximum([x for x in coods_x if x!=1e8]))/2
-    center_y = (tf.minimum([y for y in coods_y if y != 1e8]) + tf.maximum([y for y in coods_y if y != 1e8])) / 2
-    center_z = (tf.minimum([z for z in coods_z if z != 1e8]) + tf.maximum([z for z in coods_z if z != 1e8])) / 2
+    distance_maps = []
+    all_coods = []
+    for b,coods_x in enumerate(coodss_x):
+        coods_y = coodss_y[b]
+        coods_z = coodss_z[b]
+        center_x = (tf.minimum([x for x in coods_x if x!=1e8])+tf.maximum([x for x in coods_x if x!=1e8]))/2
+        center_y = (tf.minimum([y for y in coods_y if y != 1e8]) + tf.maximum([y for y in coods_y if y != 1e8])) / 2
+        center_z = (tf.minimum([z for z in coods_z if z != 1e8]) + tf.maximum([z for z in coods_z if z != 1e8])) / 2
 
-    coods = tf.constant([[coods_x[n]-center_x,coods_y[n]-center_y,coods_z[n]-center_z]
-                         for n,thing in enumerate(coods_x)])
-    distance_map = tf.constant([[1 for cood in coods] for cood in coods])
-    for i,coodi in enumerate(coods):
-        for j,coodj in enumerate(coods[i:]):
-            if tf.reduce_all(tf.equal(coodi,tf.constant([1e8,1e8,1e8]))) or \
-                tf.reduce_all(tf.equal(coodj,tf.constant([1e8,1e8,1e8]))):
-                distance = tf.sqrt(tf.reduce_sum(tf.square(coodi-coodj)))
+        coods = tf.constant([[coods_x[n]-center_x,coods_y[n]-center_y,coods_z[n]-center_z]
+                             for n,thing in enumerate(coods_x)])
+        all_coods.append(coods)
+        distance_map = [[1 for cood in coods] for cood in coods]
+        for i,coodi in enumerate(coods):
+            for j,coodj in enumerate(coods[i:]):
+                if not (tf.reduce_all(tf.equal(coodi,tf.constant([1e8,1e8,1e8]))) or \
+                    tf.reduce_all(tf.equal(coodj,tf.constant([1e8,1e8,1e8])))):
+                    distance = tf.sqrt(tf.reduce_sum(tf.square(coodi-coodj)))
+
+                    multiplier =
+        distance_maps.append(distance_map)
+
+    distance_map = tf.constant(distance_map)
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -67,6 +78,8 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
         input_ids=input_ids,
         input_mask=input_mask,
         token_type_ids=segment_ids,
+        coods=coods,
+        distance_map=distance_map,
         use_one_hot_embeddings=use_one_hot_embeddings)
 
     (masked_lm_loss, masked_lm_log_probs, masked_lm_logits) = get_masked_lm_output(
@@ -332,6 +345,12 @@ def input_fn_builder(input_files,
         "masked_lm_ids":
             tf.FixedLenFeature([max_predictions_per_seq], tf.int64),
         "masked_lm_weights":
+            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+        "3dcood_x":
+            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+        "3dcood_y":
+            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+        "3dcood_z":
             tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
     }
 
