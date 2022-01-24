@@ -13,7 +13,7 @@ MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models the official models.
 
-Best performing MutFormer model for functional effect prediction:
+Best performing MutFormer models for functional effect prediction:
 
 https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
 
