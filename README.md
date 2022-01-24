@@ -65,7 +65,7 @@ MutFormer12L | 0.909
 Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
 -----------|---------------
 MutFormer12L (excluding varity and MVP) | 0.931
-MutFormer12L/MutFormer10L (excluding varity and MVP) | 0.932
+MutFormer12L/MutFormer10L (including varity and MVP) | 0.932
 
 ## Input Data format guidelines:
 
