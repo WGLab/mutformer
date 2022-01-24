@@ -54,17 +54,18 @@ To view finetuning graphs or plot ROC curves for the predictions, use the notebo
 
 Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
 -----------|---------------
-MutBERT8L | 0.845
-MutBERT10L | 0.876
-MutFormer8L | 0.931
-MutFormer10L | 0.932
-MutFormer12L | 0.933
+MutBERT8L | 0.859
+MutBERT10L | 0.870
+MutFormer8L | 0.902
+MutFormer10L | 0.907
+MutFormer12L | 0.909
 
-## MutFormer top performance on test set for Pathogenicity Prediction with external data (excluding varity and MVP):
+## MutFormer top performance on test set for Pathogenicity Prediction with external data
 
 Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
 -----------|---------------
-MutFormer12L | 0.965
+MutFormer12L (excluding varity and MVP) | 0.931
+MutFormer12L/MutFormer10L (excluding varity and MVP) | 0.932
 
 ## Input Data format guidelines:
 
