@@ -1,2 +1,2 @@
 # Requirements
-TensorFlow >= 1.11.0,<=1.15.2
+TensorFlow >= 2.5.1
