@@ -12,7 +12,7 @@ from google.protobuf.json_format import MessageToJson
 import re
 import numpy as np
 import six
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.keras.layers import *
 from tensorflow.keras import Model
 from tensorflow import keras as keras

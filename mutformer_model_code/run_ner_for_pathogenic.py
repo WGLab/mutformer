@@ -24,10 +24,10 @@ import os
 import modeling
 import optimization
 import tokenization
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import metric_functions
-from tensorflow.contrib.framework.python.framework import checkpoint_utils
-from tensorflow.contrib.framework import assign_from_checkpoint_fn
+from tensorflow.compat.v1.contrib.framework.python.framework import checkpoint_utils
+from tensorflow.compat.v1.contrib.framework import assign_from_checkpoint_fn
 from tqdm import tqdm
 
 class InputExample(object):

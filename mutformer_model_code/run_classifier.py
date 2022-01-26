@@ -24,7 +24,7 @@ import os
 import modeling
 import optimization
 import tokenization
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import metric_functions
 from tqdm import tqdm
 
