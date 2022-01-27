@@ -21,7 +21,7 @@ from __future__ import print_function
 import os
 import modeling
 import optimization
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import metric_functions
 
 def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_rate,

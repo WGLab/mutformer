@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import re
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
 def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None,
                      weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True):

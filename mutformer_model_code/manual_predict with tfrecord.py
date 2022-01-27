@@ -12,7 +12,7 @@ from google.protobuf.json_format import MessageToJson
 import re
 import numpy as np
 import six
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from tensorflow.keras.layers import *
 from tensorflow.keras import Model
 from tensorflow import keras as keras
@@ -179,4 +179,4 @@ with open("asdf.txt", "w+") as out:
             print(indexes[n])
             if (probability[1]>0.5)!=(pred_prediction>0.5):
                 input(indexes[n])
-    tf.compat.v1.reset_default_graph()
+    tf.reset_default_graph()

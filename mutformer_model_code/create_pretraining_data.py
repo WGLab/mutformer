@@ -21,7 +21,7 @@ from __future__ import print_function
 import collections
 import random
 import tokenization
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from tqdm import tqdm
 
 flags = tf.flags
