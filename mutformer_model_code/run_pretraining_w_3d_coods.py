@@ -26,7 +26,7 @@ import metric_functions
 
 def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, bert=modeling.MutFormer_3d_coods,multiplier_num):
+                     use_one_hot_embeddings, bert=modeling.MutFormer_3d_coods):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -61,11 +61,11 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
         distance_map = [[1 for cood1 in coods] for cood2 in coods]
         for i,coodi in enumerate(coods):
             for j,coodj in enumerate(coods[i:]):
-                if not (tf.reduce_all(tf.equal(coodi,tf.constant([1e8,1e8,1e8]))) or \
-                    tf.reduce_all(tf.equal(coodj,tf.constant([1e8,1e8,1e8])))):
+                if not (tf.reduce_all(tf.equal(coodi,tf.constant([1e8,1e8,1e8]))) or
+                        tf.reduce_all(tf.equal(coodj,tf.constant([1e8,1e8,1e8])))):
                     distance = tf.sqrt(tf.reduce_sum(tf.square(coodi-coodj)))
 
-                    multiplier = multiplier_num/(distance**2)
+                    multiplier = bert_config.multiplier_num/(distance**2)
                     distance_map[i][j] = multiplier
                     distance_map[j][i] = multiplier
         distance_maps.append(distance_map)
