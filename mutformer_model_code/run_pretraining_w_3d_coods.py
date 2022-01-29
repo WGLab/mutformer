@@ -26,7 +26,7 @@ import metric_functions
 
 def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, bert=modeling.MutFormer_3d_coods):
+                     use_one_hot_embeddings, bert=modeling.MutFormer_3d_coods,multiplier_num):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -58,17 +58,19 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
         coods = tf.constant([[coods_x[n]-center_x,coods_y[n]-center_y,coods_z[n]-center_z]
                              for n,thing in enumerate(coods_x)])
         all_coods.append(coods)
-        distance_map = [[1 for cood in coods] for cood in coods]
+        distance_map = [[1 for cood1 in coods] for cood2 in coods]
         for i,coodi in enumerate(coods):
             for j,coodj in enumerate(coods[i:]):
                 if not (tf.reduce_all(tf.equal(coodi,tf.constant([1e8,1e8,1e8]))) or \
                     tf.reduce_all(tf.equal(coodj,tf.constant([1e8,1e8,1e8])))):
                     distance = tf.sqrt(tf.reduce_sum(tf.square(coodi-coodj)))
 
-                    multiplier =
+                    multiplier = multiplier_num/(distance**2)
+                    distance_map[i][j] = multiplier
+                    distance_map[j][i] = multiplier
         distance_maps.append(distance_map)
 
-    distance_map = tf.constant(distance_map)
+    distance_map = tf.constant(distance_maps)
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -78,7 +80,7 @@ def model_fn_builder(bert_config, logging_dir, init_checkpoint, init_learning_ra
         input_ids=input_ids,
         input_mask=input_mask,
         token_type_ids=segment_ids,
-        coods=coods,
+        coods=all_coods,
         distance_map=distance_map,
         use_one_hot_embeddings=use_one_hot_embeddings)
 
