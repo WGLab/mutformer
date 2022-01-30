@@ -104,6 +104,8 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
 
   total_written = 0
   for (inst_index, instance) in enumerate(train_instances):
+    if inst_index % 10000 == 0:
+      tf.logging.info("Writing instance %d of %d" % (inst_index, len(train_instances)))
     ##for TRAIN
     coods = instance.coods
     coods_x = [cood[0] for cood in coods]

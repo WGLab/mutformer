@@ -103,6 +103,8 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
 
   total_written = 0
   for (inst_index, instance) in enumerate(train_instances):
+    if inst_index % 10000 == 0:
+      tf.logging.info("Writing instance %d of %d" % (inst_index, len(train_instances)))
     ##for TRAIN
     input_ids = tokenizer.convert_tokens_to_ids(instance.tokens)
     input_mask = [1] * len(input_ids)
