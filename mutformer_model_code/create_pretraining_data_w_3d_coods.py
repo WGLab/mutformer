@@ -201,7 +201,8 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   for input_file in input_files:
     with tf.gfile.GFile(input_file, "r") as reader:
       lines = reader.read().split("\n")
-      for str_line in tqdm(lines,"tokenizing inputs:"):
+      for str_line in tqdm(lines,"tokenizing inputs:",
+                           miniters=len(lines)//100,mininterval=1,maxinterval=int(3.154e7)):
         str_line = str_line.split("||||")[0]
 
         coods = str_line.split("||||")[1]
@@ -229,7 +230,8 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   vocab_words = list(tokenizer.vocab.keys())
   instances = []
   for _ in range(dupe_factor):
-    for document_index in tqdm(range(len(all_documents)),"creating training instances from document:"):
+    for document_index in tqdm(range(len(all_documents)), "creating training instances from document:",
+                               miniters=len(all_documents) // 100, mininterval=1, maxinterval=int(3.154e7)):
       instances.extend(
           create_instances_from_document(
               all_documents, document_index, max_seq_length, short_seq_prob,
