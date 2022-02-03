@@ -517,7 +517,7 @@ class MutFormer_embedded_convs(object):
         return self.embedding_table
 
 
-class MutFormer_3d_coods(object):
+class MutFormer_distance_scaled_context(object):
     def __init__(self,
                  config,
                  is_training,
@@ -568,10 +568,6 @@ class MutFormer_3d_coods(object):
                     initializer_range=config.initializer_range,
                     max_position_embeddings=config.max_position_embeddings,
                     dropout_prob=config.hidden_dropout_prob)
-                coods = coods_processor(coods,
-                                        config.hidden_size,
-                                        config.hidden_dropout_prob,
-                                        config.initializer_range)
                 conv1 = two_convs(raw_embedding_output,
                                   config.hidden_size,
                                   config.hidden_dropout_prob)
@@ -579,7 +575,7 @@ class MutFormer_3d_coods(object):
                                   config.hidden_size,
                                   config.hidden_dropout_prob)
 
-                self.embedding_output = raw_embedding_output + conv1 + conv2 + coods
+                self.embedding_output = raw_embedding_output #+ conv1 + conv2
             with tf.variable_scope("encoder"):
                 # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
                 # mask of shape [batch_size, seq_length, seq_length] which is used
@@ -589,7 +585,134 @@ class MutFormer_3d_coods(object):
 
                 # Run the stacked transformer.
                 # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-                self.all_encoder_layers = transformer_model_w_coods(
+                self.all_encoder_layers = transformer_model_w_distancemap(
+                    input_tensor=self.embedding_output,
+                    attention_mask=attention_mask,
+                    distance_map=distance_map,
+                    hidden_size=config.hidden_size,
+                    num_hidden_layers=config.num_hidden_layers,
+                    num_attention_heads=config.num_attention_heads,
+                    intermediate_size=config.intermediate_size,
+                    intermediate_act_fn=get_activation(config.hidden_act),
+                    hidden_dropout_prob=config.hidden_dropout_prob,
+                    attention_probs_dropout_prob=config.attention_probs_dropout_prob,
+                    initializer_range=config.initializer_range,
+                    do_return_all_layers=True)
+
+            self.sequence_output = self.all_encoder_layers[-1]
+            # The "pooler" converts the encoded sequence tensor of shape
+            # [batch_size, seq_length, hidden_size] to a tensor of shape
+            # [batch_size, hidden_size]. This is necessary for segment-level
+            # (or segment-pair-level) classification tasks where we need a fixed
+            # dimensional representation of the segment.
+            with tf.variable_scope("pooler"):
+                # We "pool" the model by simply taking the hidden state corresponding
+                # to the first token. We assume that this has been pre-trained
+                first_token_tensor = tf.squeeze(self.sequence_output[:, 0:1, :], axis=1)
+                self.pooled_output = tf.layers.dense(
+                    first_token_tensor,
+                    config.hidden_size,
+                    activation=tf.tanh,
+                    kernel_initializer=create_initializer(config.initializer_range))
+
+    def get_pooled_output(self):
+        return self.pooled_output
+
+    def get_sequence_output(self):
+        """Gets final hidden layer of encoder.
+
+        Returns:
+          float Tensor of shape [batch_size, seq_length, hidden_size] corresponding
+          to the final hidden of the transformer encoder.
+        """
+        return self.sequence_output
+
+    def get_all_encoder_layers(self):
+        return self.all_encoder_layers
+
+    def get_embedding_output(self):
+        """Gets output of the embedding lookup (i.e., input to the transformer).
+
+        Returns:
+          float Tensor of shape [batch_size, seq_length, hidden_size] corresponding
+          to the output of the embedding layer, after summing the word
+          embeddings with the positional embeddings and the token type embeddings,
+          then performing layer normalization. This is the input to the transformer.
+        """
+        return self.embedding_output
+
+    def get_embedding_table(self):
+        return self.embedding_table
+
+class MutFormer_give_3d_coods2transformer(object):
+    def __init__(self,
+                 config,
+                 is_training,
+                 input_ids,
+                 input_mask=None,
+                 token_type_ids=None,
+                 use_one_hot_embeddings=False,
+                 coods=None,
+                 distance_map=None,
+                 scope=None):
+
+        config = copy.deepcopy(config)
+        if not is_training:
+            config.hidden_dropout_prob = 0.0
+            config.attention_probs_dropout_prob = 0.0
+
+        input_shape = get_shape_list(input_ids, expected_rank=2)
+        batch_size = input_shape[0]
+        seq_length = input_shape[1]
+
+        if input_mask is None:
+            input_mask = tf.ones(shape=[batch_size, seq_length], dtype=tf.int32)
+
+        if token_type_ids is None:
+            token_type_ids = tf.zeros(shape=[batch_size, seq_length], dtype=tf.int32)
+
+        with tf.variable_scope(scope, default_name="bert"):
+            with tf.variable_scope("embeddings"):
+                # Perform embedding lookup on the word ids.
+                (self.embedding_output, self.embedding_table) = embedding_lookup(
+                    input_ids=input_ids,
+                    vocab_size=config.vocab_size,
+                    embedding_size=config.hidden_size,
+                    initializer_range=config.initializer_range,
+                    word_embedding_name="word_embeddings",
+                    use_one_hot_embeddings=use_one_hot_embeddings)
+
+                # Add positional embeddings and token type embeddings, then layer
+                # normalize and perform dropout.
+                raw_embedding_output = embedding_postprocessor(
+                    input_tensor=self.embedding_output,
+                    use_token_type=True,
+                    token_type_ids=token_type_ids,
+                    token_type_vocab_size=config.type_vocab_size,
+                    token_type_embedding_name="token_type_embeddings",
+                    use_position_embeddings=True,
+                    position_embedding_name="position_embeddings",
+                    initializer_range=config.initializer_range,
+                    max_position_embeddings=config.max_position_embeddings,
+                    dropout_prob=config.hidden_dropout_prob)
+                conv1 = two_convs(raw_embedding_output,
+                                  config.hidden_size,
+                                  config.hidden_dropout_prob)
+                conv2 = two_convs(conv1,
+                                  config.hidden_size,
+                                  config.hidden_dropout_prob)
+
+                self.embedding_output = raw_embedding_output #+ conv1 + conv2
+            with tf.variable_scope("encoder"):
+                # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
+                # mask of shape [batch_size, seq_length, seq_length] which is used
+                # for the attention scores.
+                attention_mask = create_attention_mask_from_input_mask(
+                    input_ids, input_mask)
+
+                # Run the stacked transformer.
+                # `sequence_output` shape = [batch_size, seq_length, hidden_size].
+                self.all_encoder_layers = transformer_model_give3dcoods2transformer(
                     input_tensor=self.embedding_output,
                     attention_mask=attention_mask,
                     distance_map=distance_map,
@@ -1140,21 +1263,21 @@ def attention_layer(from_tensor,
   return context_layer
 
 
-def attention_layer_w_coods(from_tensor,
-                    to_tensor,
-                    attention_mask=None,
-                    distance_map=None,
-                    num_attention_heads=1,
-                    size_per_head=512,
-                    query_act=None,
-                    key_act=None,
-                    value_act=None,
-                    attention_probs_dropout_prob=0.0,
-                    initializer_range=0.02,
-                    do_return_2d_tensor=False,
-                    batch_size=None,
-                    from_seq_length=None,
-                    to_seq_length=None):
+def attention_layer_w_distancemap(from_tensor,
+                                  to_tensor,
+                                  attention_mask=None,
+                                  distance_map=None,
+                                  num_attention_heads=1,
+                                  size_per_head=512,
+                                  query_act=None,
+                                  key_act=None,
+                                  value_act=None,
+                                  attention_probs_dropout_prob=0.0,
+                                  initializer_range=0.02,
+                                  do_return_2d_tensor=False,
+                                  batch_size=None,
+                                  from_seq_length=None,
+                                  to_seq_length=None):
 
 
   def transpose_for_scores(input_tensor, batch_size, num_attention_heads,
@@ -1430,7 +1553,7 @@ def transformer_model(input_tensor,
     return final_output
 
 
-def transformer_model_w_coods(input_tensor,
+def transformer_model_w_distancemap(input_tensor,
                       attention_mask=None,
                       distance_map=None,
                       hidden_size=768,
@@ -1474,7 +1597,113 @@ def transformer_model_w_coods(input_tensor,
       with tf.variable_scope("attention"):
         attention_heads = []
         with tf.variable_scope("self"):
-          attention_head = attention_layer_w_coods(
+          attention_head = attention_layer_w_distancemap(
+              from_tensor=layer_input,
+              to_tensor=layer_input,
+              attention_mask=attention_mask,
+              distance_map=distance_map if distance_map else None,
+              num_attention_heads=num_attention_heads,
+              size_per_head=attention_head_size,
+              attention_probs_dropout_prob=attention_probs_dropout_prob,
+              initializer_range=initializer_range,
+              do_return_2d_tensor=True,
+              batch_size=batch_size,
+              from_seq_length=seq_length,
+              to_seq_length=seq_length)
+          attention_heads.append(attention_head)
+
+        attention_output = None
+        if len(attention_heads) == 1:
+          attention_output = attention_heads[0]
+        else:
+          # In the case where we have other sequences, we just concatenate
+          # them to the self-attention head before the projection.
+          attention_output = tf.concat(attention_heads, axis=-1)
+
+        # Run a linear projection of `hidden_size` then add a residual
+        # with `layer_input`.
+        with tf.variable_scope("output"):
+          attention_output = tf.layers.dense(
+              attention_output,
+              hidden_size,
+              kernel_initializer=create_initializer(initializer_range))
+          attention_output = dropout(attention_output, hidden_dropout_prob)
+          attention_output = layer_norm(attention_output + layer_input)
+
+      # The activation is only applied to the "intermediate" hidden layer.
+      with tf.variable_scope("intermediate"):
+        intermediate_output = tf.layers.dense(
+            attention_output,
+            intermediate_size,
+            activation=intermediate_act_fn,
+            kernel_initializer=create_initializer(initializer_range))
+
+      # Down-project back to `hidden_size` then add the residual.
+      with tf.variable_scope("output"):
+        layer_output = tf.layers.dense(
+            intermediate_output,
+            hidden_size,
+            kernel_initializer=create_initializer(initializer_range))
+        layer_output = dropout(layer_output, hidden_dropout_prob)
+        layer_output = layer_norm(layer_output + attention_output)
+        prev_output = layer_output
+        all_layer_outputs.append(layer_output)
+
+  if do_return_all_layers:
+    final_outputs = []
+    for layer_output in all_layer_outputs:
+      final_output = reshape_from_matrix(layer_output, input_shape)
+      final_outputs.append(final_output)
+    return final_outputs
+  else:
+    final_output = reshape_from_matrix(prev_output, input_shape)
+    return final_output
+
+def transformer_model_give3dcoods2transformer(input_tensor,
+                      attention_mask=None,
+                      distance_map=None,
+                      hidden_size=768,
+                      num_hidden_layers=12,
+                      num_attention_heads=12,
+                      intermediate_size=3072,
+                      intermediate_act_fn=gelu,
+                      hidden_dropout_prob=0.1,
+                      attention_probs_dropout_prob=0.1,
+                      initializer_range=0.02,
+                      do_return_all_layers=False):
+
+  if hidden_size % num_attention_heads != 0:
+    raise ValueError(
+        "The hidden size (%d) is not a multiple of the number of attention "
+        "heads (%d)" % (hidden_size, num_attention_heads))
+
+  attention_head_size = int(hidden_size / num_attention_heads)
+  input_shape = get_shape_list(input_tensor, expected_rank=3)
+  batch_size = input_shape[0]
+  seq_length = input_shape[1]
+  input_width = input_shape[2]
+
+  # The Transformer performs sum residuals on all layers so the input needs
+  # to be the same as the hidden size.
+  if input_width != hidden_size:
+    raise ValueError("The width of the input tensor (%d) != hidden size (%d)" %
+                     (input_width, hidden_size))
+
+  # We keep the representation as a 2D tensor to avoid re-shaping it back and
+  # forth from a 3D tensor to a 2D tensor. Re-shapes are normally free on
+  # the GPU/CPU but may not be free on the TPU, so we want to minimize them to
+  # help the optimizer.
+  prev_output = reshape_to_matrix(input_tensor)
+
+  all_layer_outputs = []
+  for layer_idx in range(num_hidden_layers):
+    with tf.variable_scope("layer_%d" % layer_idx):
+      layer_input = prev_output
+
+      with tf.variable_scope("attention"):
+        attention_heads = []
+        with tf.variable_scope("self"):
+          attention_head = attention_layer_w_distancemap(
               from_tensor=layer_input,
               to_tensor=layer_input,
               attention_mask=attention_mask,
