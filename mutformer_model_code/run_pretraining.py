@@ -128,22 +128,22 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
             metrics = train_metrics(masked_lm_log_probs, masked_lm_ids, masked_lm_weights, masked_lm_logits)
 
-            if logging_dir:
+            gs_t = tf.reshape(global_step, [1])
+
+            if logging_dir and gs_t[0] % save_logs_every_n_steps == 0:
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     gs = gs[0]
-                    if gs % save_logs_every_n_steps == 0:
-                        with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-                            with tf.contrib.summary.always_record_summaries():
-                                tf.contrib.summary.scalar('loss', loss[0], step=gs)
-                                tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
-                                tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
-                                tf.contrib.summary.scalar('precision', prec[0], step=gs)
-                                tf.contrib.summary.scalar('recall', recall[0], step=gs)
-                                tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
+                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
+                        with tf.contrib.summary.always_record_summaries():
+                            tf.contrib.summary.scalar('loss', loss[0], step=gs)
+                            tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
+                            tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
+                            tf.contrib.summary.scalar('precision', prec[0], step=gs)
+                            tf.contrib.summary.scalar('recall', recall[0], step=gs)
+                            tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
 
-                                return tf.contrib.summary.all_summary_ops()
+                            return tf.contrib.summary.all_summary_ops()
 
-                gs_t = tf.reshape(global_step, [1])
                 loss_t = tf.reshape(total_loss, [1])
                 lr_t = tf.reshape(learning_rate, [1])
                 acc_t = tf.reshape(metrics["accuracy"], [1])
