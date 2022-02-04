@@ -155,38 +155,43 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
         metrics = train_metrics(masked_lm_log_probs, masked_lm_ids, masked_lm_weights, masked_lm_logits)
 
-        if logging_dir:
-            def host_call_fn(gs, loss, lr,acc,prec,recall,f1):
-                gs = gs[0]
-                if gs%save_logs_every_n_steps==0:
-                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-
-                        with tf.contrib.summary.always_record_summaries():
-                            tf.contrib.summary.scalar('loss', loss[0], step=gs)
-                            tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
-                            tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
-                            tf.contrib.summary.scalar('precision', prec[0], step=gs)
-                            tf.contrib.summary.scalar('recall', recall[0], step=gs)
-                            tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
-
-                            return tf.contrib.summary.all_summary_ops()
-
         gs_t = tf.reshape(global_step, [1])
-        loss_t = tf.reshape(total_loss, [1])
-        lr_t = tf.reshape(learning_rate, [1])
-        acc_t = tf.reshape(metrics["accuracy"], [1])
-        precision_t = tf.reshape(metrics["precision"], [1])
-        recall_t = tf.reshape(metrics["recall"], [1])
-        f1_t = tf.reshape(metrics["dice_f1"], [1])
 
-        host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t,precision_t,recall_t,f1_t])
+        if logging_dir and gs_t[0] % save_logs_every_n_steps == 0:
+            def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
+                gs = gs[0]
+                with tf.contrib.summary.create_file_writer(logging_dir).as_default():
+                    with tf.contrib.summary.always_record_summaries():
+                        tf.contrib.summary.scalar('loss', loss[0], step=gs)
+                        tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
+                        tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
+                        tf.contrib.summary.scalar('precision', prec[0], step=gs)
+                        tf.contrib.summary.scalar('recall', recall[0], step=gs)
+                        tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
 
-        output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-            mode=mode,
-            loss=total_loss,
-            train_op=train_op,
-            scaffold_fn=scaffold_fn,
-            host_call=host_call)
+                        return tf.contrib.summary.all_summary_ops()
+
+            loss_t = tf.reshape(total_loss, [1])
+            lr_t = tf.reshape(learning_rate, [1])
+            acc_t = tf.reshape(metrics["accuracy"], [1])
+            precision_t = tf.reshape(metrics["precision"], [1])
+            recall_t = tf.reshape(metrics["recall"], [1])
+            f1_t = tf.reshape(metrics["dice_f1"], [1])
+
+            host_call = (host_call_fn, [gs_t, loss_t, lr_t, acc_t, precision_t, recall_t, f1_t])
+
+            output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+                mode=mode,
+                loss=total_loss,
+                train_op=train_op,
+                scaffold_fn=scaffold_fn,
+                host_call=host_call)
+        else:
+            output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+                mode=mode,
+                loss=total_loss,
+                train_op=train_op,
+                scaffold_fn=scaffold_fn)
 
     elif mode == tf.estimator.ModeKeys.EVAL:
       def metric_fn(masked_lm_log_probs, masked_lm_ids, masked_lm_weights,masked_lm_logits):
