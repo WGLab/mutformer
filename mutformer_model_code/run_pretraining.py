@@ -128,8 +128,6 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
             metrics = train_metrics(masked_lm_log_probs, masked_lm_ids, masked_lm_weights, masked_lm_logits)
 
-
-
             if logging_dir:
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     gs = gs[0]
