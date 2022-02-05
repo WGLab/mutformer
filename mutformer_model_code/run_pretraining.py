@@ -144,7 +144,7 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                     def writing():
                         return tf.contrib.summary.all_summary_ops()
                     def not_writing():
-                        return [tf.constant(True) for _ in tf.contrib.summary.all_summary_ops()]
+                        return [tf.constant(True) for _ in range(0,6)]
                     return tf.cond(tf.equal(tf.mod(tf.cast(gs,tf.int32),tf.constant(save_logs_every_n_steps)),tf.constant(0)),writing,not_writing)
                 gs_t = tf.reshape(global_step, [1])
                 loss_t = tf.reshape(total_loss, [1])
