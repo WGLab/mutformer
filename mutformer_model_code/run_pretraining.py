@@ -134,7 +134,7 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     gs = gs[0]
                     with tf.contrib.summary.create_file_writer(logging_dir):
-                        with tf.contrib.summary.record_summaries_every_n_global_steps(save_logs_every_n_steps,gs):
+                        with tf.contrib.summary.record_summaries_every_n_global_steps(save_logs_every_n_steps):
                             tf.contrib.summary.scalar('loss', loss[0], step=gs)
                             tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
                             tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
