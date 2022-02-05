@@ -133,15 +133,15 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
             if logging_dir:
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     gs = gs[0]
-                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-                        with tf.contrib.summary.always_record_summaries():
-                            tf.contrib.summary.scalar('loss', loss[0], step=gs)
-                            tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
-                            tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
-                            tf.contrib.summary.scalar('precision', prec[0], step=gs)
-                            tf.contrib.summary.scalar('recall', recall[0], step=gs)
-                            tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
                     def writing():
+                        with tf.contrib.summary.create_file_writer(logging_dir).as_default():
+                            with tf.contrib.summary.always_record_summaries():
+                                tf.contrib.summary.scalar('loss', loss[0], step=gs)
+                                tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
+                                tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
+                                tf.contrib.summary.scalar('precision', prec[0], step=gs)
+                                tf.contrib.summary.scalar('recall', recall[0], step=gs)
+                                tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
                         return tf.contrib.summary.all_summary_ops()
                     def not_writing():
                         return [tf.constant(True) for _ in range(0,6)]
