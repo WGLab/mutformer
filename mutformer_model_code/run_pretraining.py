@@ -133,10 +133,10 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
             if logging_dir:
                 def host_call_fn(gs, loss, lr, acc, prec, recall, f1):
                     gs = gs[0]
-                    with tf.contrib.summary.create_file_writer(logging_dir).as_default():
-                        with tf.cond(tf.equal(tf.mod(tf.cast(gs,tf.int32),tf.constant(save_logs_every_n_steps)),tf.constant(0)),
-                                     lambda: tf.contrib.summary.always_record_summaries(),
-                                     lambda: tf.contrib.summary.never_record_summaries()):
+                    writer = tf.contrib.summary.create_file_writer(logging_dir)
+                    writer.set_as_default()
+                    def writing():
+                        with tf.contrib.summary.always_record_summaries():
                             tf.contrib.summary.scalar('loss', loss[0], step=gs)
                             tf.contrib.summary.scalar('learning_rate', lr[0], step=gs)
                             tf.contrib.summary.scalar('accuracy', acc[0], step=gs)
@@ -144,6 +144,9 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                             tf.contrib.summary.scalar('recall', recall[0], step=gs)
                             tf.contrib.summary.scalar('multiclass_averaged_dice/f1', f1[0], step=gs)
                         return tf.contrib.summary.all_summary_ops()
+                    def not_writing():
+                        return [tf.constant(True) for _ in range(0, 6)]
+                    return tf.cond(tf.equal(tf.mod(tf.cast(gs,tf.int32),tf.constant(save_logs_every_n_steps)),tf.constant(0)),writing,not_writing)
                 gs_t = tf.reshape(global_step, [1])
                 loss_t = tf.reshape(total_loss, [1])
                 lr_t = tf.reshape(learning_rate, [1])
