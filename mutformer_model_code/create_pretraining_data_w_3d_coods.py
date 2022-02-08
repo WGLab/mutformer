@@ -209,7 +209,10 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
           continue
         str_line = line.split("||||")[0]
 
-        coods = line.split("||||")[1]
+        try:
+          coods = line.split("||||")[1]
+        except:
+          print(line)
         coods = [[float(ax) if ax!="x" else 1e8 for ax in xyz.split()] for xyz in coods.split("\t")]
 
         line = tokenization.convert_to_unicode(str_line)
