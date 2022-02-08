@@ -203,11 +203,11 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   for input_file in input_files:
     with tf.gfile.GFile(input_file, "r") as reader:
       lines = reader.read().split("\n")
-      for str_line in tqdm(lines,"tokenizing inputs:",
+      for line in tqdm(lines,"tokenizing inputs:",
                            miniters=len(lines)//100,mininterval=1,maxinterval=int(3.154e7)):
-        str_line = str_line.split("||||")[0]
+        str_line = line.split("||||")[0]
 
-        coods = str_line.split("||||")[1]
+        coods = line.split("||||")[1]
         coods = [[float(ax) if ax!="x" else 1e8 for ax in xyz.split()] for xyz in coods.split("\t")]
 
         line = tokenization.convert_to_unicode(str_line)
