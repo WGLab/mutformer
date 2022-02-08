@@ -205,7 +205,8 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
       lines = reader.read().split("\n")
       for line in tqdm(lines,"tokenizing inputs:",
                            miniters=len(lines)//100,mininterval=1,maxinterval=int(3.154e7)):
-        print(line)
+        if not line:
+          continue
         str_line = line.split("||||")[0]
 
         coods = line.split("||||")[1]
@@ -214,15 +215,10 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
         line = tokenization.convert_to_unicode(str_line)
         line = line.strip()
 
-        # Empty lines are used as document delimiters
-        if not line:
-          all_documents.append([])
         tokens = tokenizer.tokenize(line)
-        if tokens:
-          all_documents[-1].append([tokens,coods])
-          f+=1
-        else:
-          tf.logging.info("failed tokens:" + str(tokens)+str(str_line))
+        all_documents[-1].append([tokens,coods])
+        f+=1
+
 
   tf.logging.info("files processed:"+str(f))
 
