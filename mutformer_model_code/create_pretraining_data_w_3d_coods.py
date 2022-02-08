@@ -205,6 +205,7 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
       lines = reader.read().split("\n")
       for line in tqdm(lines,"tokenizing inputs:",
                            miniters=len(lines)//100,mininterval=1,maxinterval=int(3.154e7)):
+        print(line)
         str_line = line.split("||||")[0]
 
         coods = line.split("||||")[1]
