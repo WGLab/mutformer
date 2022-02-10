@@ -222,7 +222,7 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
               all_documents, document_index, max_seq_length, short_seq_prob,
               masked_lm_prob, max_predictions_per_seq, vocab_words, rng))
 
-  #rng.shuffle(instances)
+  rng.shuffle(instances)
   return instances
 
 
