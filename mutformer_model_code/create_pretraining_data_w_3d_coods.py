@@ -121,9 +121,9 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
       input_ids.append(0)
       input_mask.append(0)
       segment_ids.append(0)
-      coods_x.append([1e8])
-      coods_y.append([1e8])
-      coods_z.append([1e8])
+      coods_x.append(1e8)
+      coods_y.append(1e8)
+      coods_z.append(1e8)
 
     masked_lm_positions = list(instance.masked_lm_positions)
     masked_lm_ids = tokenizer.convert_tokens_to_ids(instance.masked_lm_labels)
