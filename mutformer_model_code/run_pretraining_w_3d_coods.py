@@ -91,13 +91,13 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
     distance_map = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
 
     ##coods creation
-    coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_x,1),
-                                       [coodss_x.shape[0],input_length]))*coods_mask_x
+    coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
+                                       [centers_x.shape[0],input_length]))*coods_mask_x
     print(coodss_x)
-    coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_y,1),
-                                       [coodss_y.shape[0],input_length]))*coods_mask_y
-    coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_z,1),
-                                       [coodss_z.shape[0],input_length]))*coods_mask_z
+    coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_y,1),
+                                       [centers_y.shape[0],input_length]))*coods_mask_y
+    coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_z,1),
+                                       [centers_z.shape[0],input_length]))*coods_mask_z
 
     coodss_all = tf.stack([coodss_x,coodss_y,coodss_z],axis=2)
 
