@@ -365,11 +365,11 @@ def input_fn_builder(input_files,
         "masked_lm_weights":
             tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
         "3dcood_x":
-            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+            tf.FixedLenFeature([max_seq_length], tf.float32),
         "3dcood_y":
-            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+            tf.FixedLenFeature([max_seq_length], tf.float32),
         "3dcood_z":
-            tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
+            tf.FixedLenFeature([max_seq_length], tf.float32),
     }
 
     # For training, we want a lot of parallel reading and shuffling.
