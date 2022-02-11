@@ -1369,10 +1369,11 @@ def attention_layer_w_distancemap(from_tensor,
     # effectively the same as removing these entirely.
     attention_scores += adder
 
-  # `attention_mask` = [B, 1, F, T]
-  distance_map = tf.expand_dims(distance_map, axis=[1])
+  if distance_map is not None:
+    # `attention_mask` = [B, 1, F, T]
+    distance_map = tf.expand_dims(distance_map, axis=[1])
 
-  attention_scores *= distance_map
+    attention_scores *= distance_map
 
 
   # Normalize the attention scores to probabilities.
