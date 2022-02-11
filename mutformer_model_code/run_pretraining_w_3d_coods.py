@@ -88,6 +88,7 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
     ##coods creation
     coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_x,1),
                                        [coodss_x.shape[0],input_length]))*coods_mask_x
+    print(coodss_x)
     coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_y,1),
                                        [coodss_y.shape[0],input_length]))*coods_mask_y
     coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(coodss_z,1),
