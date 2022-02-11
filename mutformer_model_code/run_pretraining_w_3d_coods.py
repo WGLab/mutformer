@@ -51,6 +51,9 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
         invalid_mask = tf.cast(tf.equal(input_tensor, tf.constant(1e8)),tf.float32)
         invalid_mask_horiz = tf.broadcast_to(tf.expand_dims(input_tensor,1),[input_tensor.shape[0],input_length,input_length])
         invalid_mask_vert = tf.broadcast_to(tf.expand_dims(input_tensor,2), [input_tensor.shape[0], input_length, input_length])
+        print("inv_mask_vert",invalid_mask_horiz)
+        print("inv_mask_vert",invalid_mask_vert)
+
         distance_map_invalid_mask = tf.cast(tf.greater(invalid_mask_vert+invalid_mask_horiz,0),tf.float32)
 
         centers = (tf.reduce_max(input_tensor*invalid_mask,axis=1)+ \
@@ -58,6 +61,8 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
         coodss_2d_horiz = tf.broadcast_to(tf.expand_dims(input_tensor,1),[input_tensor.shape[0],input_length,input_length])
         coodss_2d_vert = tf.broadcast_to(tf.expand_dims(input_tensor,2), [input_tensor.shape[0], input_length, input_length])
+        print("coodss_2d_horiz", coodss_2d_horiz)
+        print("coodss_2d_vert", coodss_2d_vert)
 
         coodss_2d_vert=coodss_2d_vert-(invalid_mask_vert*1e8)
         coodss_2d_horiz = coodss_2d_horiz-(invalid_mask_horiz * 1e8)
