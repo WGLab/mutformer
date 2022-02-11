@@ -1369,11 +1369,10 @@ def attention_layer_w_distancemap(from_tensor,
     # effectively the same as removing these entirely.
     attention_scores += adder
 
-  if distance_map is not None:
-    # `attention_mask` = [B, 1, F, T]
-    distance_map = tf.expand_dims(distance_map, axis=[1])
+  # `attention_mask` = [B, 1, F, T]
+  distance_map = tf.expand_dims(distance_map, axis=[1])
 
-    attention_scores *= distance_map
+  attention_scores *= distance_map
 
 
   # Normalize the attention scores to probabilities.
@@ -1848,7 +1847,7 @@ def transformer_model_give3dcoods2transformer(input_tensor,
               from_tensor=layer_input,
               to_tensor=layer_input,
               attention_mask=attention_mask,
-              coods=coods if coods else None,
+              coods=coods,
               num_attention_heads=num_attention_heads,
               size_per_head=attention_head_size,
               attention_probs_dropout_prob=attention_probs_dropout_prob,
