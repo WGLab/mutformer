@@ -168,7 +168,9 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
           values = feature.int64_list.value
         elif feature.float_list.value:
           values = feature.float_list.value
-        tf.logging.info(f"{feature_name} (len:{len(values)}): {' '.join([str(x) for x in values])}")
+        printstring = f"{feature_name} (len:{len(values)}): {' '.join([str(x) for x in values])}"
+        printstring = printstring if len(printstring)<200 else printstring[:200]
+        tf.logging.info(printstring)
 
   for writer in writers:
     writer.close()
@@ -202,7 +204,7 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   for input_file in input_files:
     with tf.gfile.GFile(input_file, "r") as reader:
       lines = reader.read().split("\n")
-      for orig_line in tqdm(lines,"tokenizing inputs:",
+      for orig_line in tqdm(lines,"tokenizing inputs",
                            miniters=len(lines)//100,mininterval=1,maxinterval=int(3.154e7)):
         if not orig_line:
           continue
