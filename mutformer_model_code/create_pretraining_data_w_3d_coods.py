@@ -278,12 +278,14 @@ def create_instances_from_document(
     segment_ids = []
     tokens.append("[CLS]")
     segment_ids.append(0)
+    coods.append([1e8,1e8,1e8])
     for token in sequence:
       tokens.append(token)
       segment_ids.append(0)
 
     tokens.append("[SEP]")
     segment_ids.append(0)
+    coods.append([1e8, 1e8, 1e8])
 
     (tokens, masked_lm_positions,
      masked_lm_labels) = create_masked_lm_predictions(

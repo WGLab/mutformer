@@ -26,7 +26,7 @@ import metric_functions
 
 def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, save_logs_every_n_steps=1, logging_dir=None, bert=modeling.MutFormer_3d_coods):
+                     use_one_hot_embeddings, save_logs_every_n_steps=1, logging_dir=None, bert=modeling.MutFormer_distance_scaled_context):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
