@@ -51,8 +51,6 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
         invalid_mask = tf.cast(tf.equal(input_tensor, tf.constant(1e8)),tf.float32)
         invalid_mask_horiz = tf.broadcast_to(tf.expand_dims(input_tensor,1),[input_tensor.shape[0],input_length,input_length])
         invalid_mask_vert = tf.broadcast_to(tf.expand_dims(input_tensor,2), [input_tensor.shape[0], input_length, input_length])
-        print("inv_mask_vert",invalid_mask_horiz)
-        print("inv_mask_vert",invalid_mask_vert)
 
         distance_map_invalid_mask = tf.cast(tf.greater(invalid_mask_vert+invalid_mask_horiz,0),tf.float32)
 
@@ -61,8 +59,6 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
         coodss_2d_horiz = tf.broadcast_to(tf.expand_dims(input_tensor,1),[input_tensor.shape[0],input_length,input_length])
         coodss_2d_vert = tf.broadcast_to(tf.expand_dims(input_tensor,2), [input_tensor.shape[0], input_length, input_length])
-        print("coodss_2d_horiz", coodss_2d_horiz)
-        print("coodss_2d_vert", coodss_2d_vert)
 
         coodss_2d_vert=coodss_2d_vert-(invalid_mask_vert*1e8)
         coodss_2d_horiz = coodss_2d_horiz-(invalid_mask_horiz * 1e8)
@@ -86,14 +82,17 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                                             distances_mask_y_wfinalshape+
                                             distances_mask_z_wfinalshape,0),tf.float32)
 
-    coods_distances_all = coods_distances_all*distances_mask_all
+    coods_distances_all = coods_distances_all*((distances_mask_all-1)*-1)
 
-    distance_map = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
+    distances_all = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
+    distances_squared = tf.square(distances_all)
+    distances_ready_for_division = distances_squared+(tf.cast(tf.equal(distances_squared,0),tf.float32)*
+                                    bert_config.multiplier_num)
+    distance_map = bert_config.multiplier_num/distances_ready_for_division
 
     ##coods creation
     coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
                                        [centers_x.shape[0],input_length]))*coods_mask_x
-    print(coodss_x)
     coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_y,1),
                                        [centers_y.shape[0],input_length]))*coods_mask_y
     coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_z,1),
