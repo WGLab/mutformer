@@ -169,7 +169,7 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
         elif feature.float_list.value:
           values = feature.float_list.value
         printstring = f"{feature_name} (len:{len(values)}): {' '.join([str(x) for x in values])}"
-        printstring = printstring if len(printstring)<200 else printstring[:200]
+        printstring = printstring if len(printstring)<200 else printstring[:200]+"..."
         tf.logging.info(printstring)
 
   for writer in writers:
