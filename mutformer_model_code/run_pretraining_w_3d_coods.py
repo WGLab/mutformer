@@ -257,38 +257,44 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
         coodss_distance_map = tf.abs(coodss_2d_horiz - coodss_2d_vert)
         return invalid_mask, distance_map_invalid_mask, centers, coodss_distance_map
 
-    ##distance map creation
-    coods_mask_x, distance_mask_x, centers_x, coods_distances_x = infer_from_coodset(coodss_x)
-    coods_mask_y, distance_mask_y, centers_y, coods_distances_y = infer_from_coodset(coodss_y)
-    coods_mask_z, distance_mask_z, centers_z, coods_distances_z = infer_from_coodset(coodss_z)
+    with  tf.variable_scope("3d_coods_processing"):
+        ##distance map creation
 
-    coods_distances_all = tf.stack([coods_distances_x,coods_distances_y,coods_distances_z],axis=3)
+        coods_mask_x, distance_mask_x, centers_x, coods_distances_x = infer_from_coodset(coodss_x)
+        coods_mask_y, distance_mask_y, centers_y, coods_distances_y = infer_from_coodset(coodss_y)
+        coods_mask_z, distance_mask_z, centers_z, coods_distances_z = infer_from_coodset(coodss_z)
 
-    distances_mask_x_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_x,3), [distance_mask_x.shape[0], input_length, input_length,3])
-    distances_mask_y_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_y,3), [distance_mask_y.shape[0], input_length, input_length,3])
-    distances_mask_z_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_z,3), [distance_mask_z.shape[0], input_length, input_length,3])
+        coods_distances_all = tf.stack([coods_distances_x,coods_distances_y,coods_distances_z],axis=3)
 
-    distances_mask_all = tf.cast(tf.greater(distances_mask_x_wfinalshape+
-                                            distances_mask_y_wfinalshape+
-                                            distances_mask_z_wfinalshape,0),tf.float32)
+        distances_mask_x_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_x,3), [distance_mask_x.shape[0], input_length, input_length,3])
+        distances_mask_y_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_y,3), [distance_mask_y.shape[0], input_length, input_length,3])
+        distances_mask_z_wfinalshape = tf.broadcast_to(tf.expand_dims(distance_mask_z,3), [distance_mask_z.shape[0], input_length, input_length,3])
 
-    coods_distances_all = coods_distances_all*((distances_mask_all-1)*-1)
+        distances_mask_all = tf.cast(tf.greater(distances_mask_x_wfinalshape+
+                                                distances_mask_y_wfinalshape+
+                                                distances_mask_z_wfinalshape,0),tf.float32)
 
-    distances_all = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
-    distances_squared = tf.square(distances_all)
-    distances_ready_for_division = distances_squared+(tf.cast(tf.equal(distances_squared,0),tf.float32)*
-                                    bert_config.multiplier_num)
-    distance_map = bert_config.multiplier_num/distances_ready_for_division
+        coods_distances_all = coods_distances_all*((distances_mask_all-1)*-1)
 
-    ##coods creation
-    coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
-                                       [centers_x.shape[0],input_length]))*coods_mask_x
-    coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_y,1),
-                                       [centers_y.shape[0],input_length]))*coods_mask_y
-    coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_z,1),
-                                       [centers_z.shape[0],input_length]))*coods_mask_z
+        distances_all = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
+        distances_squared = tf.square(distances_all)
+        distances_ready_for_division = distances_squared+(tf.cast(tf.equal(distances_squared,0),tf.float32)*
+                                        bert_config.multiplier_num)
+        multiplier_num = tf.get_variable(
+            "multiplier_num",
+            shape=[1],
+            initializer=modeling.create_initializer(bert_config.initializer_range))
+        distance_map = multiplier_num/distances_ready_for_division
 
-    coodss_all = tf.stack([coodss_x,coodss_y,coodss_z],axis=2)
+        ##coods creation
+        coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
+                                           [centers_x.shape[0],input_length]))*coods_mask_x
+        coodss_y=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_y,1),
+                                           [centers_y.shape[0],input_length]))*coods_mask_y
+        coodss_z=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_z,1),
+                                           [centers_z.shape[0],input_length]))*coods_mask_z
+
+        coodss_all = tf.stack([coodss_x,coodss_y,coodss_z],axis=2)
     return distance_map,coodss_all
 
 def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
