@@ -277,18 +277,25 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
         coods_distances_all = coods_distances_all*((distances_mask_all-1)*-1)
 
         distances_all = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
-        power = tf.get_variable(
-            "distance_power",
-            shape=[1],
-            initializer=modeling.create_initializer(2))
-        distances_squared = tf.pow(distances_all,tf.abs(power))
-        distances_ready_for_division = distances_squared+(tf.cast(tf.equal(distances_squared,0),tf.float32)*
-                                        bert_config.multiplier_num)
-        multiplier_num = tf.get_variable(
-            "multiplier_num",
-            shape=[1],
-            initializer=modeling.create_initializer(20))
-        distance_map = tf.abs(multiplier_num)/distances_ready_for_division
+        if not bert_config.multiplier_num:
+            power = tf.get_variable(
+                "distance_power",
+                shape=[1],
+                initializer=modeling.create_initializer(2))
+            distances_squared = tf.pow(distances_all,tf.abs(power))
+
+            multiplier_num = tf.get_variable(
+                "multiplier_num",
+                shape=[1],
+                initializer=modeling.create_initializer(20))
+            distances_ready_for_division = distances_squared + (tf.cast(tf.equal(distances_squared, 0), tf.float32) *
+                                                                multiplier_num)
+            distance_map = tf.abs(multiplier_num)/distances_ready_for_division
+        else:
+            distances_squared = tf.square(distances_all)
+            distances_ready_for_division = distances_squared + (tf.cast(tf.equal(distances_squared, 0), tf.float32) *
+                                                                bert_config.multiplier_num)
+            distance_map = tf.abs(bert_config.multiplier_num) / distances_ready_for_division
 
         ##coods creation
         coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
