@@ -283,7 +283,6 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
                 shape=[1],
                 initializer=modeling.create_initializer(2))
             distances_squared = tf.pow(distances_all,tf.abs(power))
-
             multiplier_num = tf.get_variable(
                 "multiplier_num",
                 shape=[1],
