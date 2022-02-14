@@ -277,7 +277,7 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
         coods_distances_all = coods_distances_all*((distances_mask_all-1)*-1)
 
         distances_all = tf.sqrt(tf.reduce_sum(tf.square(coods_distances_all),axis=3))
-        if not hasattr(bert_config, "mutliplier_num"):
+        if not hasattr(bert_config, "multiplier_num"):
             power = tf.get_variable(
                 "distance_power",
                 shape=[1],
