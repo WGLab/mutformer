@@ -294,7 +294,7 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
             distances_squared = tf.square(distances_all)
             distances_ready_for_division = distances_squared + (tf.cast(tf.equal(distances_squared, 0), tf.float32) *
                                                                 bert_config.multiplier_num)
-            distance_map = tf.abs(bert_config.multiplier_num) / distances_ready_for_division
+            distance_map = bert_config.multiplier_num / distances_ready_for_division
 
         ##coods creation
         coodss_x=(coodss_x-tf.broadcast_to(tf.expand_dims(centers_x,1),
