@@ -433,4 +433,6 @@ if __name__ == "__main__":
   flags.mark_flag_as_required("input_file")
   flags.mark_flag_as_required("output_file")
   flags.mark_flag_as_required("vocab_file")
+  print("0")
   tf.app.run()
+  print("1")
