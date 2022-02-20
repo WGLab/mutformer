@@ -273,7 +273,8 @@ def create_instances_from_document(
   current_chunk = []
   current_length = 0
   i = 0
-  for i,[sequence,coods] in enumerate(document):
+  for i,stuff in enumerate(document):
+    [sequence, coods] = stuff
     tokens = []
     segment_ids = []
     tokens.append("[CLS]")
