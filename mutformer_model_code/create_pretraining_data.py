@@ -214,15 +214,14 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
 
   vocab_words = list(tokenizer.vocab.keys())
   instances = []
-  for _ in range(dupe_factor):
-    for document_index in tqdm(range(len(all_documents)),"creating training instances from document:",
+  for _ in tqdm(range(dupe_factor),"creating training instances from document",
                                miniters=len(all_documents)//100,mininterval=1,maxinterval=int(3.154e7)):
+    for document_index in range(len(all_documents)):
       instances.extend(
           create_instances_from_document(
               all_documents, document_index, max_seq_length, short_seq_prob,
               masked_lm_prob, max_predictions_per_seq, vocab_words, rng))
 
-  rng.shuffle(instances)
   return instances
 
 
@@ -276,7 +275,7 @@ def create_instances_from_document(
       masked_lm_positions=masked_lm_positions,
       masked_lm_labels=masked_lm_labels)
     instances.append(instance)
-
+  rng.shuffle(instances)
   return instances
 
 
