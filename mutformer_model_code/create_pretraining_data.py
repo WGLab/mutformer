@@ -412,6 +412,5 @@ if __name__ == "__main__":
   flags.mark_flag_as_required("output_file")
   flags.mark_flag_as_required("vocab_file")
   print("started")
-  print("asdf")
   tf.app.run()
   print("finished")
