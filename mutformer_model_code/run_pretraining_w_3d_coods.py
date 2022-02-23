@@ -282,16 +282,16 @@ def process_coods(coodss_x,coodss_y,coodss_z,bert_config):
                 "distance_power",
                 shape=[1],
                 initializer=modeling.create_initializer(bert_config.initializer_range))
-            power = power_var*100
-            distances_squared = tf.pow(distances_all,tf.abs(power))
+            power = tf.abs(power_var*100)
+            distances_squared = tf.pow(distances_all,power)
             multiplier_num_var = tf.get_variable(
                 "multiplier_num",
                 shape=[1],
                 initializer=modeling.create_initializer(bert_config.initializer_range))
-            multiplier_num = multiplier_num_var*1000
+            multiplier_num = tf.abs(multiplier_num_var*1000)
             distances_ready_for_division = distances_squared + (tf.cast(tf.equal(distances_squared, 0), tf.float32) *
                                                                 multiplier_num)
-            distance_map = tf.abs(multiplier_num)/distances_ready_for_division
+            distance_map = multiplier_num/distances_ready_for_division
         else:
             distances_squared = tf.square(distances_all)
             distances_ready_for_division = distances_squared + (tf.cast(tf.equal(distances_squared, 0), tf.float32) *
