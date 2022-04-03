@@ -581,7 +581,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
         for v in tf.global_variables():
             valid=True
             for i in range(0, freezing_layers):
-                if not "encoder/layer_"+str(i) in v.name and "conv" not in v.name:
+                if "encoder/layer_"+str(i) in v.name or "conv" in v.name:
                     valid=False
             if valid: not_frozen.append(v)
 
