@@ -557,37 +557,31 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
     else:
         pass ##it will error saying scaffold_fn is not defined, because tpu is currently required
 
-
-    tf.logging.info("**** Trainable Variables ****")
-    for var in tvars:
-      init_string = ""
-      if var.name in initialized_variable_names:
-        init_string = ", *INIT_FROM_CKPT*"
-
-      else:
-        init_string = ", *INIT_NEW*"
-      tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
-                      init_string)
-
-    global_step = tf.train.get_or_create_global_step()
-
-
     if freezing is not None:
-        not_frozen = [v for v in tf.global_variables() if not "embedding" in v.name]
+        not_frozen = []
         if freezing=="all":
             freezing_layers = bert_config.num_hidden_layers
         else:
             freezing_layers = freezing
-        for v in tf.global_variables():
+        for v in tf.trainable_variables():
             valid=True
             for i in range(0, freezing_layers):
                 if "encoder/layer_"+str(i) in v.name or "conv" in v.name:
                     valid=False
             if valid: not_frozen.append(v)
 
-        tf.logging.info("TRAINING VARIABLES")
-        for v in not_frozen:
-            tf.logging.info(v.name)
+    tf.logging.info("**** Trainable Variables ****")
+    for var in tvars if not freezing else not_frozen:
+        init_string = ""
+        if var.name in initialized_variable_names:
+            init_string = ", *INIT_FROM_CKPT*"
+
+        else:
+            init_string = ", *INIT_NEW*"
+        tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
+                        init_string)
+
+    global_step = tf.train.get_or_create_global_step()
 
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
