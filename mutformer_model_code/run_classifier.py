@@ -563,10 +563,11 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
             freezing_layers = bert_config.num_hidden_layers
         else:
             freezing_layers = freezing
+        not_frozen = tvars[tvars.index([var for var in tvars if "encoder/layer_"+str(freezing_layers[-1]) in var.name][-1])+1:]
         for v in tf.trainable_variables():
             valid=True
             for i in range(0, freezing_layers):
-                if "encoder/layer_"+str(i) in v.name or "conv" in v.name:
+                if "encoder/layer_"+str(i) in v.name or "conv" in v.name or "embeddings" in v.name:
                     valid=False
             if valid: not_frozen.append(v)
 
