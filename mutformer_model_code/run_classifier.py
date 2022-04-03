@@ -579,9 +579,11 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
         else:
             freezing_layers = freezing
         for v in tf.global_variables():
-            for i in range(0,freezing_layers):
+            valid=True
+            for i in range(0, freezing_layers):
                 if not "encoder/layer_"+str(i) in v.name and "conv" not in v.name:
-                    not_frozen.append(v)
+                    valid=False
+            if valid: not_frozen.append(v)
 
         tf.logging.info("TRAINING VARIABLES")
         for v in not_frozen:
