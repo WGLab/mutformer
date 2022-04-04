@@ -572,8 +572,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
 
         else:
             init_string = ", *INIT_NEW*"
-        tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
-                        init_string)
+        tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,init_string)
 
     global_step = tf.train.get_or_create_global_step()
 
