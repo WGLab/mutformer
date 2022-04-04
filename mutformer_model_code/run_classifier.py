@@ -563,7 +563,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
         else:
             freezing_layers = freezing_x_layers
         not_frozen = tvars[tvars.index([var for var in tvars if "encoder/layer_"+str(freezing_layers-1) in var.name][-1])+1:]
-        grad_mask = tf.constant([1 if var in not_frozen else 0 for var in tvars])
+        grad_mask = [1 if var in not_frozen else 0 for var in tvars]
 
     tf.logging.info("**** Trainable Variables ****")
     for var in tvars if not freezing_x_layers else not_frozen:

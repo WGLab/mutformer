@@ -64,7 +64,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
       tvars = tf.trainable_variables()
   grads = tf.gradients(loss, tvars)
   if grad_mask:
-      grads *= grad_mask
+      grads *= tf.cosntant(grad_mask)
 
   # This is how the model was pre-trained.
   if clip:
