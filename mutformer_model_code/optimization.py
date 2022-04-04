@@ -21,7 +21,7 @@ from __future__ import print_function
 import re
 import tensorflow as tf
 
-def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None,
+def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None, grad_mask=None,
                      weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True):
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
@@ -63,6 +63,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if tvars is None:
       tvars = tf.trainable_variables()
   grads = tf.gradients(loss, tvars)
+  if grad_mask:
+      grads *= grad_mask
 
   # This is how the model was pre-trained.
   if clip:
