@@ -581,7 +581,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op, learning_rate = optimization.create_optimizer(
             total_loss, init_learning_rate, decay_per_step,
-            num_warmup_steps, use_tpu,tvars=not_frozen if freezing else None,
+            num_warmup_steps, use_tpu,tvars=not_frozen if freezing_x_layers else None,
             weight_decay=weight_decay,epsilon=epsilon,optimizer_name=optim,clip=clip_grads)
 
         def train_metrics(ids, logits):
