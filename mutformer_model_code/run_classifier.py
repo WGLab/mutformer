@@ -490,7 +490,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
     return (tot_loss, per_example_loss, logits, probabilities)
 
 def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint, init_learning_rate,
-                     decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, save_logs_every_n_steps=1, weights=None,freezing=None,
+                     decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, save_logs_every_n_steps=1, weights=None,freezing_x_layers=None,
                      yield_predictions=False,bert=modeling.BertModel, logging_dir=None,test_results_dir=None,weight_decay = 0.01,
                      epsilon=1e-4,optim="adam",clip_grads=True,using_ex_data = False):
   """Returns `model_fn` closure for TPUEstimator."""
@@ -557,13 +557,13 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
     else:
         pass ##it will error saying scaffold_fn is not defined, because tpu is currently required
 
-    if freezing is not None:
+    if freezing_x_layers is not None:
         not_frozen = []
-        if freezing=="all":
+        if freezing_x_layers=="all":
             freezing_layers = bert_config.num_hidden_layers
         else:
-            freezing_layers = freezing
-        not_frozen = tvars[tvars.index([var for var in tvars if "encoder/layer_"+str(freezing_layers[-1]) in var.name][-1])+1:]
+            freezing_layers = freezing_x_layers
+        not_frozen = tvars[tvars.index([var for var in tvars if "encoder/layer_"+str(freezing_layers) in var.name][-1])+1:]
         for v in tf.trainable_variables():
             valid=True
             for i in range(0, freezing_layers):
@@ -572,7 +572,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
             if valid: not_frozen.append(v)
 
     tf.logging.info("**** Trainable Variables ****")
-    for var in tvars if not freezing else not_frozen:
+    for var in tvars if not freezing_x_layers else not_frozen:
         init_string = ""
         if var.name in initialized_variable_names:
             init_string = ", *INIT_FROM_CKPT*"
