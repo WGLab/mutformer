@@ -27,11 +27,12 @@ import tokenization
 import tensorflow as tf
 import metric_functions
 from tqdm import tqdm
+import random
 
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
 
-  def __init__(self, guid, text_a, text_b=None, label=None, ex_data=None):
+  def __init__(self, guid, text_a, text_b=None, label=None, ex_data=None,pos=None):
     """Constructs a InputExample.
 
     Args:
@@ -48,6 +49,7 @@ class InputExample(object):
     self.text_b = text_b
     self.label = label
     self.ex_data = ex_data
+    self.pos = pos
 
 
 class InputFeatures(object):
@@ -132,8 +134,9 @@ class MrpcProcessor(DataProcessor):
       text_a = tokenization.convert_to_unicode(line[1])
       text_b = tokenization.convert_to_unicode(line[2])
       label = tokenization.convert_to_unicode(line[0])
+      pos = tokenization.convert_to_unicode(line[3])
       examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, pos=pos))
     return examples
 
 class MrpcWithExDataProcessor(DataProcessor):
@@ -165,8 +168,9 @@ class MrpcWithExDataProcessor(DataProcessor):
       text_b = tokenization.convert_to_unicode(line[2])
       label = tokenization.convert_to_unicode(line[0])
       ex_data = tokenization.convert_to_unicode(line[3])
+      pos = tokenization.convert_to_unicode(line[4])
       examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, ex_data=ex_data))
+          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, ex_data=ex_data, pos=pos))
     return examples
 
 
@@ -197,12 +201,13 @@ class REProcessor(DataProcessor):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[0])
       label = tokenization.convert_to_unicode(line[1])
+      pos = tokenization.convert_to_unicode(line[4])
       examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+          InputExample(guid=guid, text_a=text_a, text_b=None, label=label, pos=pos))
     return examples
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
-                           tokenizer):
+                           tokenizer,create_altered_data=False):
   """Converts a single `InputExample` into a single `InputFeatures`."""
 
   label_map = {}
@@ -302,40 +307,49 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   return feature
 
 
+def shuffle(lst, name):
+    newLst = []
+    for i in tqdm(range(0, len(lst)), "shuffling " + name):
+        ind = random.randint(0, len(lst) - 1)
+        newLst.append(lst[ind])
+        del lst[ind]
+    return newLst
+
 def file_based_convert_examples_to_features(
-    examples, label_list, max_seq_length, tokenizer, output_file):
+    examples, label_list, max_seq_length, tokenizer, output_file,augment_factor=1):
   """Convert a set of `InputExample`s to a TFRecord file."""
 
   writer = tf.python_io.TFRecordWriter(output_file)
 
-  for (ex_index, example) in enumerate(examples):
-    if ex_index % 10000 == 0:
-      tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
+  for data_copy_ind in range(augment_factor):
+      for (ex_index, example) in enumerate(examples):
+        if ex_index % 10000 == 0:
+          tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
 
-    feature = convert_single_example(ex_index, example, label_list,
-                                     max_seq_length, tokenizer)
+        feature = convert_single_example(ex_index, example, label_list,
+                                         max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
+
+        def create_int_feature(values):
+          f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
+          return f
 
 
-    def create_int_feature(values):
-      f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
-      return f
+        def create_float_feature(values):
+          f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
+          return f
 
+        features = collections.OrderedDict()
+        features["input_ids"] = create_int_feature(feature.input_ids)
+        features["input_mask"] = create_int_feature(feature.input_mask)
+        features["segment_ids"] = create_int_feature(feature.segment_ids)
+        features["label_ids"] = create_int_feature([feature.label_id])
+        if feature.ex_data:
+            features["ex_data"] = create_float_feature(feature.ex_data)
+        features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
 
-    def create_float_feature(values):
-      f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
-      return f
-
-    features = collections.OrderedDict()
-    features["input_ids"] = create_int_feature(feature.input_ids)
-    features["input_mask"] = create_int_feature(feature.input_mask)
-    features["segment_ids"] = create_int_feature(feature.segment_ids)
-    features["label_ids"] = create_int_feature([feature.label_id])
-    if feature.ex_data:
-        features["ex_data"] = create_float_feature(feature.ex_data)
-    features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
-
-    tf_example = tf.train.Example(features=tf.train.Features(feature=features))
-    writer.write(tf_example.SerializeToString())
+        tf_example = tf.train.Example(features=tf.train.Features(feature=features))
+        writer.write(tf_example.SerializeToString())
+      examples = shuffle(examples,"examples")
   writer.close()
 
 
