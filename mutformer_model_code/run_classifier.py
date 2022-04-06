@@ -201,7 +201,7 @@ class REProcessor(DataProcessor):
       guid = "%s-%s" % (set_type, i)
       text_a = tokenization.convert_to_unicode(line[0])
       label = tokenization.convert_to_unicode(line[1])
-      pos = tokenization.convert_to_unicode(line[4])
+      pos = tokenization.convert_to_unicode(line[2])
       examples.append(
           InputExample(guid=guid, text_a=text_a, text_b=None, label=label, pos=pos))
     return examples
@@ -214,6 +214,9 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   for (i, label) in enumerate(label_list):
     label_map[label] = i
 
+  pos = example.pos
+
+
   ex_data = example.ex_data
   if ex_data:
     ex_data = [float(ex_dat) for ex_dat in ex_data.split()]
@@ -222,6 +225,18 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   tokens_b = None
   if example.text_b:
     tokens_b = tokenizer.tokenize(example.text_b)
+
+  if create_altered_data:
+      def generate_clips(seq,pos):
+          start_clip = random.randint(0, int(pos / 2))
+          end_clip = random.randint(int((len(seq) + pos) / 2), len(seq))
+          return start_clip,end_clip
+
+      start_clip,end_clip = generate_clips(tokens_a,pos)
+      tokens_a = tokens_a[start_clip:end_clip]
+      if tokens_b:
+          tokens_b = tokens_b[start_clip:end_clip]
+
 
   if tokens_b:
     # Modifies `tokens_a` and `tokens_b` in place so that the total
