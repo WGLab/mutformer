@@ -216,7 +216,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   for (i, label) in enumerate(label_list):
     label_map[label] = i
 
-  pos = example.pos
+  pos = int(example.pos)
 
 
   ex_data = example.ex_data
