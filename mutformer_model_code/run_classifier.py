@@ -29,6 +29,8 @@ import metric_functions
 from tqdm import tqdm
 import random
 
+random.ssed(31415926525)
+
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
 
@@ -331,12 +333,12 @@ def shuffle(lst, name):
     return newLst
 
 def file_based_convert_examples_to_features(
-    examples, label_list, max_seq_length, tokenizer, output_file,augment_factor=1):
+    examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=1):
   """Convert a set of `InputExample`s to a TFRecord file."""
 
   writer = tf.python_io.TFRecordWriter(output_file)
 
-  for data_copy_ind in range(augment_factor):
+  for data_copy_ind in range(augmented_data_copies):
       for (ex_index, example) in enumerate(examples):
         if ex_index % 10000 == 0:
           tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
