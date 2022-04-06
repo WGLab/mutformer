@@ -235,9 +235,9 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
           return start_clip,end_clip
 
       start_clip,end_clip = generate_clips(tokens_a,pos)
-      tokens_a = tokens_a[start_clip:end_clip]
+      tokens_a = tokens_a[start_clip:end_clip + 1]
       if tokens_b:
-          tokens_b = tokens_b[start_clip:end_clip]
+          tokens_b = tokens_b[start_clip:end_clip + 1]
 
 
   if tokens_b:

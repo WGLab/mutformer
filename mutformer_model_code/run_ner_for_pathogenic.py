@@ -186,6 +186,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         start_clip, end_clip = generate_clips(tokens_a, position-1)
         tokens_a = tokens_a[start_clip:end_clip+1]
         labels = labels[start_clip:end_clip+1]
+        position-=start_clip
 
     # Account for [CLS] and [SEP] with "- 2"
     if len(tokens_a) > max_seq_length - 2:
