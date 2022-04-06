@@ -29,7 +29,7 @@ import metric_functions
 from tqdm import tqdm
 import random
 
-random.ssed(31415926525)
+random.seed(31415926525)
 
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
