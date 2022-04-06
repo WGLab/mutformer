@@ -305,13 +305,13 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   if ex_index < 5:
     tf.logging.info("*** Example ***")
     tf.logging.info("guid: %s" % (example.guid))
-    tf.logging.info("tokens: %s" % " ".join(
+    tf.logging.info(f"tokens (length = {len(tokens)}): %s" % " ".join(
         [tokenization.printable_text(x) for x in tokens]))
-    tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-    tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
-    tf.logging.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
+    tf.logging.info(f"input_ids (length = {len(input_ids)}): %s" % " ".join([str(x) for x in input_ids]))
+    tf.logging.info(f"input_mask (length = {len(input_mask)}): %s" % " ".join([str(x) for x in input_mask]))
+    tf.logging.info(f"segment_ids (length = {len(segment_ids)}): %s" % " ".join([str(x) for x in segment_ids]))
     if ex_data:
-        tf.logging.info("ex_data (length = " +str(len(ex_data))+ "): %s" % " ".join([str(x) for x in ex_data]))
+        tf.logging.info(f"ex_data (length = {len(ex_data)}): %s" % " ".join([str(x) for x in ex_data]))
     tf.logging.info("label: %s (id = %d)" % (example.label, label_id))
 
   feature = InputFeatures(
