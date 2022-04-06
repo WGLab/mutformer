@@ -183,7 +183,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
             end_clip = random.randint(int((len(seq) + pos) / 2), len(seq))
             return start_clip, end_clip
 
-        start_clip, end_clip = generate_clips(tokens_a, position)
+        start_clip, end_clip = generate_clips(tokens_a, position-1)
         tokens_a = tokens_a[start_clip:end_clip]
         labels = labels[start_clip:end_clip]
 
