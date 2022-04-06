@@ -341,7 +341,7 @@ def file_based_convert_examples_to_features(
   for data_copy_ind in range(augmented_data_copies):
       for (ex_index, example) in enumerate(examples):
         if ex_index % 10000 == 0:
-          tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
+          tf.logging.info(f"Writing example {ex_index} of {len(examples)} for augmented copy #{data_copy_ind}")
 
         feature = convert_single_example(ex_index, example, label_list,
                                          max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
