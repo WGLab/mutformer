@@ -30,6 +30,10 @@ from tensorflow.contrib.framework.python.framework import checkpoint_utils
 from tensorflow.contrib.framework import assign_from_checkpoint_fn
 from tqdm import tqdm
 
+import random
+
+random.seed(20220406)
+
 class InputExample(object):
     """A single training/test example for simple sequence classification."""
 
@@ -152,7 +156,7 @@ class NERProcessor(DataProcessor):
 
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
-                           tokenizer):
+                           tokenizer,create_altered_data):
     """Converts a single `InputExample` into a single `InputFeatures`."""
 
     if isinstance(example, PaddingInputExample):
@@ -172,6 +176,16 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     labels = example.labels.split(" ")
     labels = [label_map[lbl] for lbl in labels]
     position=int(example.pos)+1
+
+    if create_altered_data:
+        def generate_clips(seq, pos):
+            start_clip = random.randint(0, int(pos / 2))
+            end_clip = random.randint(int((len(seq) + pos) / 2), len(seq))
+            return start_clip, end_clip
+
+        start_clip, end_clip = generate_clips(tokens_a, position)
+        tokens_a = tokens_a[start_clip:end_clip]
+        labels = labels[start_clip:end_clip]
 
     # Account for [CLS] and [SEP] with "- 2"
     if len(tokens_a) > max_seq_length - 2:
@@ -240,32 +254,32 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
 
 
 def file_based_convert_examples_to_features(
-        examples, label_list, max_seq_length, tokenizer, output_file):
+        examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=1):
     """Convert a set of `InputExample`s to a TFRecord file."""
 
     writer = tf.python_io.TFRecordWriter(output_file)
+    for data_copy_ind in range(augmented_data_copies):
+        for (ex_index, example) in enumerate(examples):
+            if ex_index % 10000 == 0:
+                tf.logging.info(f"Writing example {ex_index} of {len(examples)} for augmented copy #{data_copy_ind}")
 
-    for (ex_index, example) in enumerate(examples):
-        if ex_index % 10000 == 0:
-            tf.logging.info("Writing example %d of %d" % (ex_index, len(examples)))
+            feature = convert_single_example(ex_index, example, label_list,
+                                             max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
 
-        feature = convert_single_example(ex_index, example, label_list,
-                                         max_seq_length, tokenizer)
+            def create_int_feature(values):
+                f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
+                return f
 
-        def create_int_feature(values):
-            f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
-            return f
+            features = collections.OrderedDict()
+            features["input_ids"] = create_int_feature(feature.input_ids)
+            features["input_mask"] = create_int_feature(feature.input_mask)
+            features["segment_ids"] = create_int_feature(feature.segment_ids)
+            features["label_ids"] = create_int_feature(feature.label_ids)
+            features["mutation_mask"] = create_int_feature(feature.mutation_mask)
+            features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
 
-        features = collections.OrderedDict()
-        features["input_ids"] = create_int_feature(feature.input_ids)
-        features["input_mask"] = create_int_feature(feature.input_mask)
-        features["segment_ids"] = create_int_feature(feature.segment_ids)
-        features["label_ids"] = create_int_feature(feature.label_ids)
-        features["mutation_mask"] = create_int_feature(feature.mutation_mask)
-        features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
-
-        tf_example = tf.train.Example(features=tf.train.Features(feature=features))
-        writer.write(tf_example.SerializeToString())
+            tf_example = tf.train.Example(features=tf.train.Features(feature=features))
+            writer.write(tf_example.SerializeToString())
     writer.close()
 
 
