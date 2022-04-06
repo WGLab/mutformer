@@ -265,7 +265,7 @@ def file_based_convert_examples_to_features(
                 tf.logging.info(f"Writing example {ex_index} of {len(examples)} for augmented copy #{data_copy_ind}")
 
             feature = convert_single_example(ex_index, example, label_list,
-                                             max_seq_length, tokenizer,create_altered_data=data_copy_ind>=0)
+                                             max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
 
             def create_int_feature(values):
                 f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
