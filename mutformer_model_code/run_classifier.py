@@ -332,7 +332,7 @@ def shuffle(lst, name):
     return newLst
 
 def file_based_convert_examples_to_features(
-    examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=1):
+    examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=0):
   """Convert a set of `InputExample`s to a TFRecord file."""
 
   writer = tf.python_io.TFRecordWriter(output_file)
