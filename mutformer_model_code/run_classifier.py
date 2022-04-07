@@ -218,7 +218,6 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
 
   pos = int(example.pos)
 
-
   ex_data = example.ex_data
   if ex_data:
     ex_data = [float(ex_dat) for ex_dat in ex_data.split()]
@@ -338,35 +337,39 @@ def file_based_convert_examples_to_features(
 
   writer = tf.python_io.TFRecordWriter(output_file)
 
-  for data_copy_ind in range(augmented_data_copies):
-      for (ex_index, example) in enumerate(examples):
-        if ex_index % 10000 == 0:
-          tf.logging.info(f"Writing example {ex_index} of {len(examples)} for augmented copy #{data_copy_ind}")
+  data_augmentation_examples = [[example,0] for example in examples]
 
-        feature = convert_single_example(ex_index, example, label_list,
-                                         max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
+  for i in range(augmented_data_copies):
+      data_augmentation_examples.extend([[example,1] for example in examples])
+  data_augmentation_examples = shuffle(data_augmentation_examples)
+  for (ex_index, [example,augment]) in enumerate(data_augmentation_examples):
+    if ex_index % 10000 == 0:
+      tf.logging.info(f"Writing example {ex_index} of {len(examples)}")
 
-        def create_int_feature(values):
-          f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
-          return f
+    feature = convert_single_example(ex_index, example, label_list,
+                                     max_seq_length, tokenizer,create_altered_data=augment)
+
+    def create_int_feature(values):
+      f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
+      return f
 
 
-        def create_float_feature(values):
-          f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
-          return f
+    def create_float_feature(values):
+      f = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
+      return f
 
-        features = collections.OrderedDict()
-        features["input_ids"] = create_int_feature(feature.input_ids)
-        features["input_mask"] = create_int_feature(feature.input_mask)
-        features["segment_ids"] = create_int_feature(feature.segment_ids)
-        features["label_ids"] = create_int_feature([feature.label_id])
-        if feature.ex_data:
-            features["ex_data"] = create_float_feature(feature.ex_data)
-        features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
+    features = collections.OrderedDict()
+    features["input_ids"] = create_int_feature(feature.input_ids)
+    features["input_mask"] = create_int_feature(feature.input_mask)
+    features["segment_ids"] = create_int_feature(feature.segment_ids)
+    features["label_ids"] = create_int_feature([feature.label_id])
+    if feature.ex_data:
+        features["ex_data"] = create_float_feature(feature.ex_data)
+    features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
 
-        tf_example = tf.train.Example(features=tf.train.Features(feature=features))
-        writer.write(tf_example.SerializeToString())
-      examples = shuffle(examples,"examples")
+    tf_example = tf.train.Example(features=tf.train.Features(feature=features))
+    writer.write(tf_example.SerializeToString())
+  examples = shuffle(examples,"examples")
   writer.close()
 
 
