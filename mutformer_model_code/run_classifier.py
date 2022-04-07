@@ -344,7 +344,7 @@ def file_based_convert_examples_to_features(
   data_augmentation_examples = shuffle(data_augmentation_examples,"examples")
   for (ex_index, [example,augment]) in enumerate(data_augmentation_examples):
     if ex_index % 10000 == 0:
-      tf.logging.info(f"Writing example {ex_index} of {len(examples)}")
+      tf.logging.info(f"Writing example {ex_index} of {len(data_augmentation_examples)}")
 
     feature = convert_single_example(ex_index, example, label_list,
                                      max_seq_length, tokenizer,create_altered_data=augment==1)
