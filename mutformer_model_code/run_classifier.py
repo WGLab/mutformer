@@ -341,13 +341,13 @@ def file_based_convert_examples_to_features(
 
   for i in range(augmented_data_copies):
       data_augmentation_examples.extend([[example,1] for example in examples])
-  data_augmentation_examples = shuffle(data_augmentation_examples)
+  data_augmentation_examples = shuffle(data_augmentation_examples,"examples")
   for (ex_index, [example,augment]) in enumerate(data_augmentation_examples):
     if ex_index % 10000 == 0:
       tf.logging.info(f"Writing example {ex_index} of {len(examples)}")
 
     feature = convert_single_example(ex_index, example, label_list,
-                                     max_seq_length, tokenizer,create_altered_data=augment)
+                                     max_seq_length, tokenizer,create_altered_data=augment==1)
 
     def create_int_feature(values):
       f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
@@ -369,7 +369,6 @@ def file_based_convert_examples_to_features(
 
     tf_example = tf.train.Example(features=tf.train.Features(feature=features))
     writer.write(tf_example.SerializeToString())
-  examples = shuffle(examples,"examples")
   writer.close()
 
 
