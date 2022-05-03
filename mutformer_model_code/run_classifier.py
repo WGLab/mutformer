@@ -107,7 +107,6 @@ class DataProcessor(object):
       return lines
 
 
-
 class MrpcProcessor(DataProcessor):
   def get_train_examples(self, data_dir, read_range=None):
     """See base class."""

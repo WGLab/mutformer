@@ -139,6 +139,7 @@ class NERProcessor(DataProcessor):
             self._read_tsv(os.path.join(data_dir, f"test{'_' + dataset if dataset else ''}.tsv"),
                            read_range=read_range), "test")
 
+
     def get_labels(self):
         """See base class."""
         return ["B", "P"]
