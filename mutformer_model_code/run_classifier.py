@@ -119,10 +119,10 @@ class MrpcProcessor(DataProcessor):
     return self._create_examples(
         self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
 
-  def get_test_examples(self, data_dir, read_range=None):
+  def get_test_examples(self, data_dir, read_range=None,dataset=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv"),read_range=read_range), "test")
+        self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
 
   def get_labels(self):
     """See base class."""
@@ -152,10 +152,10 @@ class MrpcWithExDataProcessor(DataProcessor):
     return self._create_examples(
         self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
 
-  def get_test_examples(self, data_dir, read_range=None):
+  def get_test_examples(self, data_dir, read_range=None,dataset=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv"),read_range=read_range), "test")
+        self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
 
   def get_labels(self):
     """See base class."""
@@ -187,10 +187,10 @@ class REProcessor(DataProcessor):
     return self._create_examples(
         self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
 
-  def get_test_examples(self, data_dir, read_range=None):
+  def get_test_examples(self, data_dir, read_range=None,dataset=None):
     """See base class."""
     return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "test.tsv"),read_range=read_range), "test")
+        self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
 
   def get_labels(self):
     """See base class."""
