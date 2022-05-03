@@ -254,34 +254,44 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         is_real_example=True)
     return feature
 
+def shuffle(lst, name):
+    newLst = []
+    for i in tqdm(range(0, len(lst)), "shuffling " + name):
+        ind = random.randint(0, len(lst) - 1)
+        newLst.append(lst[ind])
+        del lst[ind]
+    return newLst
 
 def file_based_convert_examples_to_features(
-        examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=1):
+        examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=0):
     """Convert a set of `InputExample`s to a TFRecord file."""
 
     writer = tf.python_io.TFRecordWriter(output_file)
-    for data_copy_ind in range(augmented_data_copies):
-        for (ex_index, example) in enumerate(examples):
-            if ex_index % 10000 == 0:
-                tf.logging.info(f"Writing example {ex_index} of {len(examples)} for augmented copy #{data_copy_ind}")
+    data_augmentation_examples = []
+    for i in range(augmented_data_copies):
+        data_augmentation_examples.extend([[example, 1] for example in examples])
+    data_augmentation_examples = shuffle(data_augmentation_examples, "examples")
+    for (ex_index, [example, augment]) in enumerate(data_augmentation_examples):
+        if ex_index % 10000 == 0:
+            tf.logging.info(f"Writing example {ex_index} of {len(data_augmentation_examples)}")
 
-            feature = convert_single_example(ex_index, example, label_list,
-                                             max_seq_length, tokenizer,create_altered_data=data_copy_ind>0)
+        feature = convert_single_example(ex_index, example, label_list,
+                                         max_seq_length, tokenizer,create_altered_data=augment==1)
 
-            def create_int_feature(values):
-                f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
-                return f
+        def create_int_feature(values):
+            f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
+            return f
 
-            features = collections.OrderedDict()
-            features["input_ids"] = create_int_feature(feature.input_ids)
-            features["input_mask"] = create_int_feature(feature.input_mask)
-            features["segment_ids"] = create_int_feature(feature.segment_ids)
-            features["label_ids"] = create_int_feature(feature.label_ids)
-            features["mutation_mask"] = create_int_feature(feature.mutation_mask)
-            features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
+        features = collections.OrderedDict()
+        features["input_ids"] = create_int_feature(feature.input_ids)
+        features["input_mask"] = create_int_feature(feature.input_mask)
+        features["segment_ids"] = create_int_feature(feature.segment_ids)
+        features["label_ids"] = create_int_feature(feature.label_ids)
+        features["mutation_mask"] = create_int_feature(feature.mutation_mask)
+        features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
 
-            tf_example = tf.train.Example(features=tf.train.Features(feature=features))
-            writer.write(tf_example.SerializeToString())
+        tf_example = tf.train.Example(features=tf.train.Features(feature=features))
+        writer.write(tf_example.SerializeToString())
     writer.close()
 
 
