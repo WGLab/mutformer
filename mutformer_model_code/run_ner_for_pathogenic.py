@@ -256,13 +256,10 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         is_real_example=True)
     return feature
 
-def shuffle(lst, name):
-    newLst = []
-    for i in tqdm(range(0, len(lst)), "shuffling " + name):
-        ind = random.randint(0, len(lst) - 1)
-        newLst.append(lst[ind])
-        del lst[ind]
-    return newLst
+def shuffle(lst, name=""):
+    print(f"shuffling"+" "if name else ""+f"{name}...")
+    random.shuffle(lst)
+    return lst
 
 def file_based_convert_examples_to_features(
         examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=0):
