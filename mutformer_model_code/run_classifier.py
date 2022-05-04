@@ -227,15 +227,16 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     tokens_b = tokenizer.tokenize(example.text_b)
 
   if create_altered_data:
-      def generate_clips(seq,pos):
-          start_clip = random.randint(0, int(pos / 2))
-          end_clip = random.randint(int((len(seq) + pos) / 2), len(seq))
-          return start_clip,end_clip
+      if random.randint(0,1)==0:
+          def generate_clips(seq,pos):
+              start_clip = random.randint(0, int(pos / 2))
+              end_clip = random.randint(int((len(seq) + pos) / 2), len(seq))
+              return start_clip,end_clip
 
-      start_clip,end_clip = generate_clips(tokens_a,pos)
-      tokens_a = tokens_a[start_clip:end_clip + 1]
-      if tokens_b:
-          tokens_b = tokens_b[start_clip:end_clip + 1]
+          start_clip,end_clip = generate_clips(tokens_a,pos)
+          tokens_a = tokens_a[start_clip:end_clip + 1]
+          if tokens_b:
+              tokens_b = tokens_b[start_clip:end_clip + 1]
 
 
   if tokens_b:
