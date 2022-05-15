@@ -600,7 +600,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
         frozen += tvars[freeze_start:freeze_end+1]
     if freeze_embeddings:
         frozen+=[var for var in tvars if "embeddings/" in var.name and "conv" not in var.name]
-    if freez_adap_vocab:
+    if freeze_adap_vocab:
         frozen += [var for var in tvars if "conv" in var.name]
 
     grad_mask = [0 if var in frozen else 1 for var in tvars]
