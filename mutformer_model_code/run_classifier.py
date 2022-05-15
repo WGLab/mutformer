@@ -521,7 +521,7 @@ def create_model(bert_config, model, is_training, input_ids, input_mask, segment
 
 def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, save_logs_every_n_steps=1, weights=None,
-                     freezing_x_layers=None, freez_adap_vocab=False, freeze_embeddings=False,
+                     freezing_x_layers=None, freeze_adap_vocab=False, freeze_embeddings=False,
                      yield_predictions=False,bert=modeling.BertModel, logging_dir=None,test_results_dir=None,weight_decay = 0.01,
                      epsilon=1e-4,optim="adam",clip_grads=True,using_ex_data = False):
   """Returns `model_fn` closure for TPUEstimator."""
