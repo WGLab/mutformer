@@ -644,7 +644,7 @@ class MutFormer_distance_scaled_context(object):
     def get_embedding_table(self):
         return self.embedding_table
 
-class MutFormer_give_3d_coods2transformer(object):
+class ProtMorpher_(object):
     def __init__(self,
                  config,
                  is_training,
@@ -702,7 +702,7 @@ class MutFormer_give_3d_coods2transformer(object):
                                   config.hidden_size,
                                   config.hidden_dropout_prob)
 
-                self.embedding_output = raw_embedding_output #+ conv1 + conv2
+                self.embedding_output = raw_embedding_output + conv1 + conv2
             with tf.variable_scope("encoder"):
                 # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
                 # mask of shape [batch_size, seq_length, seq_length] which is used
@@ -712,10 +712,10 @@ class MutFormer_give_3d_coods2transformer(object):
 
                 # Run the stacked transformer.
                 # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-                self.all_encoder_layers = transformer_model_give3dcoods2transformer(
+                self.all_encoder_layers = transformer_model_w_distancemap(
                     input_tensor=self.embedding_output,
                     attention_mask=attention_mask,
-                    coods=coods,
+                    distance_map=distance_map,
                     hidden_size=config.hidden_size,
                     num_hidden_layers=config.num_hidden_layers,
                     num_attention_heads=config.num_attention_heads,
@@ -770,7 +770,6 @@ class MutFormer_give_3d_coods2transformer(object):
 
     def get_embedding_table(self):
         return self.embedding_table
-
 
 def gelu(x):
   """Gaussian Error Linear Unit.
@@ -946,6 +945,8 @@ def embedding_postprocessor(input_tensor,
                             position_embedding_name="position_embeddings",
                             initializer_range=0.02,
                             max_position_embeddings=512,
+                            use_cood_embeddings=False,
+                            coods=None,
                             dropout_prob=0.1):
   """Performs various post-processing on a word embedding tensor.
 
