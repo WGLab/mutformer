@@ -323,13 +323,13 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   return feature
 
 def shuffle(lst, name=""):
-    print(f"shuffling"+" "if name else ""+f"{name}...")
+    print(f"shuffling"+(" " if name else "")+f"{name}...")
     random.shuffle(lst)
     return lst
 
 
 def file_based_convert_examples_to_features(
-    examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=0):
+    examples, label_list, max_seq_length, tokenizer, output_file,augmented_data_copies=0,shuffle_data=False):
   """Convert a set of `InputExample`s to a TFRecord file."""
 
   writer = tf.python_io.TFRecordWriter(output_file)
@@ -338,7 +338,8 @@ def file_based_convert_examples_to_features(
 
   for i in range(augmented_data_copies):
       data_augmentation_examples.extend([[example,1] for example in examples])
-  data_augmentation_examples = shuffle(data_augmentation_examples,"examples")
+  if shuffle_data:
+    data_augmentation_examples = shuffle(data_augmentation_examples,"examples")
   for (ex_index, [example,augment]) in enumerate(data_augmentation_examples):
     if ex_index % 10000 == 0:
       tf.logging.info(f"Writing example {ex_index} of {len(data_augmentation_examples)}")

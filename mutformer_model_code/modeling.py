@@ -935,6 +935,22 @@ def embedding_lookup(input_ids,
                       input_shape[0:-1] + [input_shape[-1] * embedding_size])
   return (output, embedding_table)
 
+def create_CAcood_embedding(coods,
+                            name,
+                            embedding_size=128,
+                            initializer_range=0.02):
+    input_shape = get_shape_list(coods, expected_rank=3)
+    cood_dims = input_shape[-1]
+    cood_embedding_table = tf.get_variable(
+        name=name,
+        shape=[cood_dims, embedding_size],
+        initializer=create_initializer(initializer_range))
+    flattened_coods = tf.reshape(coods, [-1,cood_dims])
+    cood_embeddings = tf.matmul(flattened_coods, cood_embedding_table)
+    output = tf.reshape(cood_embeddings,
+                        input_shape[0:-1] + [input_shape[-1] * embedding_size])
+    return output
+
 
 def embedding_postprocessor(input_tensor,
                             use_token_type=False,
@@ -945,8 +961,6 @@ def embedding_postprocessor(input_tensor,
                             position_embedding_name="position_embeddings",
                             initializer_range=0.02,
                             max_position_embeddings=512,
-                            use_cood_embeddings=False,
-                            coods=None,
                             dropout_prob=0.1):
   """Performs various post-processing on a word embedding tensor.
 
@@ -998,6 +1012,7 @@ def embedding_postprocessor(input_tensor,
     token_type_embeddings = tf.reshape(token_type_embeddings,
                                        [batch_size, seq_length, width])
     output += token_type_embeddings
+
 
   if use_position_embeddings:
     assert_op = tf.assert_less_equal(seq_length, max_position_embeddings)
@@ -1412,148 +1427,6 @@ def attention_layer_w_distancemap(from_tensor,
 
   return context_layer
 
-def attention_layer_givecoods(from_tensor,
-                                  to_tensor,
-                                  attention_mask=None,
-                                  coods=None,
-                                  num_attention_heads=1,
-                                  size_per_head=512,
-                                  query_act=None,
-                                  key_act=None,
-                                  value_act=None,
-                                  attention_probs_dropout_prob=0.0,
-                                  initializer_range=0.02,
-                                  do_return_2d_tensor=False,
-                                  batch_size=None,
-                                  from_seq_length=None,
-                                  to_seq_length=None):
-
-
-  def transpose_for_scores(input_tensor, batch_size, num_attention_heads,
-                           seq_length, width):
-    output_tensor = tf.reshape(
-        input_tensor, [batch_size, seq_length, num_attention_heads, width])
-
-    output_tensor = tf.transpose(output_tensor, [0, 2, 1, 3])
-    return output_tensor
-
-  from_shape = get_shape_list(from_tensor, expected_rank=[2, 3])
-  to_shape = get_shape_list(to_tensor, expected_rank=[2, 3])
-
-  if len(from_shape) != len(to_shape):
-    raise ValueError(
-        "The rank of `from_tensor` must match the rank of `to_tensor`.")
-
-  if len(from_shape) == 3:
-    batch_size = from_shape[0]
-    from_seq_length = from_shape[1]
-    to_seq_length = to_shape[1]
-  elif len(from_shape) == 2:
-    if (batch_size is None or from_seq_length is None or to_seq_length is None):
-      raise ValueError(
-          "When passing in rank 2 tensors to attention_layer, the values "
-          "for `batch_size`, `from_seq_length`, and `to_seq_length` "
-          "must all be specified.")
-
-  # Scalar dimensions referenced here:
-  #   B = batch size (number of sequences)
-  #   F = `from_tensor` sequence length
-  #   T = `to_tensor` sequence length
-  #   N = `num_attention_heads`
-  #   H = `size_per_head`
-
-  from_tensor_2d = reshape_to_matrix(from_tensor)
-  to_tensor_2d = reshape_to_matrix(to_tensor)
-
-  # `query_layer` = [B*F, N*H]
-  query_layer = tf.layers.dense(
-      from_tensor_2d,
-      num_attention_heads * size_per_head,
-      activation=query_act,
-      name="query",
-      kernel_initializer=create_initializer(initializer_range))
-
-  # `key_layer` = [B*T, N*H]
-  key_layer = tf.layers.dense(
-      to_tensor_2d,
-      num_attention_heads * size_per_head,
-      activation=key_act,
-      name="key",
-      kernel_initializer=create_initializer(initializer_range))
-
-  # `value_layer` = [B*T, N*H]
-  value_layer = tf.layers.dense(
-      to_tensor_2d,
-      num_attention_heads * size_per_head,
-      activation=value_act,
-      name="value",
-      kernel_initializer=create_initializer(initializer_range))
-
-  # `query_layer` = [B, N, F, H]
-  query_layer = transpose_for_scores(query_layer, batch_size,
-                                     num_attention_heads, from_seq_length,
-                                     size_per_head)
-
-  # `key_layer` = [B, N, T, H]
-  key_layer = transpose_for_scores(key_layer, batch_size, num_attention_heads,
-                                   to_seq_length, size_per_head)
-
-  # Take the dot product between "query" and "key" to get the raw
-  # attention scores.
-  # `attention_scores` = [B, N, F, T]
-  attention_scores = tf.matmul(query_layer, key_layer, transpose_b=True)
-  attention_scores = tf.multiply(attention_scores,
-                                 1.0 / math.sqrt(float(size_per_head)))
-
-  if attention_mask is not None:
-    # `attention_mask` = [B, 1, F, T]
-    attention_mask = tf.expand_dims(attention_mask, axis=[1])
-
-    # Since attention_mask is 1.0 for positions we want to attend and 0.0 for
-    # masked positions, this operation will create a tensor which is 0.0 for
-    # positions we want to attend and -10000.0 for masked positions.
-    adder = (1.0 - tf.cast(attention_mask, tf.float32)) * -10000.0
-
-    # Since we are adding it to the raw scores before the softmax, this is
-    # effectively the same as removing these entirely.
-    attention_scores += adder
-
-  # Normalize the attention scores to probabilities.
-  # `attention_probs` = [B, N, F, T]
-  attention_probs = tf.nn.softmax(attention_scores)
-
-  # This is actually dropping out entire tokens to attend to, which might
-  # seem a bit unusual, but is taken from the original Transformer paper.
-  attention_probs = dropout(attention_probs, attention_probs_dropout_prob)
-
-  # `value_layer` = [B, T, N, H]
-  value_layer = tf.reshape(
-      value_layer,
-      [batch_size, to_seq_length, num_attention_heads, size_per_head])
-
-  # `value_layer` = [B, N, T, H]
-  value_layer = tf.transpose(value_layer, [0, 2, 1, 3])
-
-  # `context_layer` = [B, N, F, H]
-  context_layer = tf.matmul(attention_probs, value_layer)
-
-  # `context_layer` = [B, F, N, H]
-  context_layer = tf.transpose(context_layer, [0, 2, 1, 3])
-
-  if do_return_2d_tensor:
-    # `context_layer` = [B*F, N*H]
-    context_layer = tf.reshape(
-        context_layer,
-        [batch_size * from_seq_length, num_attention_heads * size_per_head])
-  else:
-    # `context_layer` = [B, F, N*H]
-    context_layer = tf.reshape(
-        context_layer,
-        [batch_size, from_seq_length, num_attention_heads * size_per_head])
-
-  return context_layer
-
-
 def transformer_model(input_tensor,
                       attention_mask=None,
                       hidden_size=768,
@@ -1758,7 +1631,7 @@ def transformer_model_w_distancemap(input_tensor,
         if len(attention_heads) == 1:
           attention_output = attention_heads[0]
         else:
-          # In the case where we have other sequences, we just concatenate
+          # In the case where we have other sequences, we just concatenatmorphe
           # them to the self-attention head before the projection.
           attention_output = tf.concat(attention_heads, axis=-1)
 
@@ -1801,18 +1674,21 @@ def transformer_model_w_distancemap(input_tensor,
     final_output = reshape_from_matrix(prev_output, input_shape)
     return final_output
 
-def transformer_model_give3dcoods2transformer(input_tensor,
+def morphformer_model(input_tensor,
                       attention_mask=None,
-                      coods=None,
+                      phipsi_angles=None,
                       hidden_size=768,
                       num_hidden_layers=12,
                       num_attention_heads=12,
                       intermediate_size=3072,
                       intermediate_act_fn=gelu,
+                      cood_pred_act_fn=gelu,
                       hidden_dropout_prob=0.1,
                       attention_probs_dropout_prob=0.1,
                       initializer_range=0.02,
                       do_return_all_layers=False):
+
+
 
   if hidden_size % num_attention_heads != 0:
     raise ValueError(
@@ -1836,29 +1712,36 @@ def transformer_model_give3dcoods2transformer(input_tensor,
   # the GPU/CPU but may not be free on the TPU, so we want to minimize them to
   # help the optimizer.
   prev_output = reshape_to_matrix(input_tensor)
+  current_phipsi = phipsi_angles
 
   all_layer_outputs = []
   for layer_idx in range(num_hidden_layers):
     with tf.variable_scope("layer_%d" % layer_idx):
       layer_input = prev_output
+      coods = phipsi2coods(current_phipsi)
+      distance_map = coods2distance_map(coods)
+
+
+      ##ADD IMPLEMENTATION FOR 3D COOD EMBEDDINGS ON EACH STEP
+
 
       with tf.variable_scope("attention"):
         attention_heads = []
         with tf.variable_scope("self"):
-          attention_head = attention_layer_givecoods(
-              from_tensor=layer_input,
-              to_tensor=layer_input,
-              attention_mask=attention_mask,
-              coods=coods,
-              num_attention_heads=num_attention_heads,
-              size_per_head=attention_head_size,
-              attention_probs_dropout_prob=attention_probs_dropout_prob,
-              initializer_range=initializer_range,
-              do_return_2d_tensor=True,
-              batch_size=batch_size,
-              from_seq_length=seq_length,
-              to_seq_length=seq_length)
-          attention_heads.append(attention_head)
+            attention_head = attention_layer_w_distancemap(
+                from_tensor=layer_input,
+                to_tensor=layer_input,
+                attention_mask=attention_mask,
+                distance_map=distance_map,
+                num_attention_heads=num_attention_heads,
+                size_per_head=attention_head_size,
+                attention_probs_dropout_prob=attention_probs_dropout_prob,
+                initializer_range=initializer_range,
+                do_return_2d_tensor=True,
+                batch_size=batch_size,
+                from_seq_length=seq_length,
+                to_seq_length=seq_length)
+            attention_heads.append(attention_head)
 
         attention_output = None
         if len(attention_heads) == 1:
@@ -1894,18 +1777,37 @@ def transformer_model_give3dcoods2transformer(input_tensor,
             kernel_initializer=create_initializer(initializer_range))
         layer_output = dropout(layer_output, hidden_dropout_prob)
         layer_output = layer_norm(layer_output + attention_output)
+        def predict_phipsi(input_tensor):
+            with tf.variable_scope("transform"):
+                input_tensor = tf.layers.dense(
+                    input_tensor,
+                    units=hidden_size,
+                    activation=get_activation(cood_pred_act_fn),
+                    kernel_initializer=create_initializer(initializer_range))
+                input_tensor = layer_norm(input_tensor)
+                input_tensor = dropout(input_tensor, hidden_dropout_prob)
+
+            phi_pred_weights = tf.get_variable(
+                "output_weights", [3, hidden_size],
+                initializer=tf.truncated_normal_initializer(stddev=0.1))
+
+            phi_pred_bias = tf.get_variable(
+                "output_bias", [3], initializer=tf.zeros_initializer())
+            logits = tf.matmul(input_tensor, phi_pred_weights, transpose_b=True)
+            force_vectors = tf.nn.bias_add(logits, phi_pred_bias)
+            predicted_phipsi = phipsi2coods(current_phipsi,
+                                          force_vectors=force_vectors)
+            return predicted_phipsi
+
+        final_layer_output = reshape_from_matrix(layer_output, input_shape)
+        current_phipsi = predict_phipsi(final_layer_output)
         prev_output = layer_output
-        all_layer_outputs.append(layer_output)
+        all_layer_outputs.append(final_layer_output)
 
   if do_return_all_layers:
-    final_outputs = []
-    for layer_output in all_layer_outputs:
-      final_output = reshape_from_matrix(layer_output, input_shape)
-      final_outputs.append(final_output)
-    return final_outputs
+    return all_layer_outputs
   else:
-    final_output = reshape_from_matrix(prev_output, input_shape)
-    return final_output
+    return all_layer_outputs[-1]
 
 
 def get_shape_list(tensor, expected_rank=None, name=None):
