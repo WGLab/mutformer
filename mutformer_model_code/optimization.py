@@ -71,7 +71,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if clip:
       (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
 
-  accumulated_grads = [tf.Variable(tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
+  accumulated_grads = [tf.Variable(lambda: tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
