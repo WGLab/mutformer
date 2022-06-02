@@ -524,7 +524,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
                      decay_per_step, num_warmup_steps, use_tpu, use_one_hot_embeddings, save_logs_every_n_steps=1, weights=None,
                      freezing_x_layers=None, freeze_adap_vocab=False, freeze_embeddings=False,
                      yield_predictions=False,bert=modeling.BertModel, logging_dir=None,test_results_dir=None,weight_decay = 0.01,
-                     epsilon=1e-4,optim="adam",clip_grads=True,using_ex_data = False):
+                     epsilon=1e-4,optim="adam",clip_grads=True,using_ex_data = False,grad_accum_mul=1):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -625,7 +625,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint,restore_checkpoint
         train_op, learning_rate = optimization.create_optimizer(
             total_loss, init_learning_rate, decay_per_step,
             num_warmup_steps, use_tpu, grad_mask = grad_mask if len(frozen)>0 else None,
-            weight_decay=weight_decay,epsilon=epsilon,optimizer_name=optim,clip=clip_grads)
+            weight_decay=weight_decay,epsilon=epsilon,optimizer_name=optim,clip=clip_grads,ga_amt=grad_accum_mul)
 
         def train_metrics(ids, logits):
             """Computes the loss and accuracy of the model."""
