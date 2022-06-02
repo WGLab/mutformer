@@ -25,7 +25,6 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
                      weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True,ga_amt=1):
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
-  accumulated_grads = [tf.Variable(tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
 
   learning_rate = init_lr - (tf.abs(decay_per_step) * tf.cast(global_step,tf.float32))
 
@@ -71,6 +70,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   # This is how the model was pre-trained.
   if clip:
       (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
+
+  accumulated_grads = [tf.Variable(tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
