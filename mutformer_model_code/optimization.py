@@ -22,9 +22,10 @@ import re
 import tensorflow as tf
 
 def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None, grad_mask=None,
-                     weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True):
+                     weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True,ga_amt=1):
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
+  accumulated_grads = [tf.Variable(tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
 
   learning_rate = init_lr - (tf.abs(decay_per_step) * tf.cast(global_step,tf.float32))
 
@@ -71,13 +72,25 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if clip:
       (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
 
-  train_op = optimizer.apply_gradients(
-      zip(grads, tvars), global_step=global_step)
+  def apply_accumulated_gradients(accum_grads, grads, tvars):
+      accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
+      with tf.control_dependencies([accum_op]):
+          normalized_accum_grads = [1.0 * accum_grad / ga_amt for accum_grad in
+                                       accum_grads]
+          (clippedNormalized_accum_grads, _) = tf.clip_by_global_norm(normalized_accum_grads, clip_norm=1.0)
+          minimize_op = optimizer.apply_gradients(zip(clippedNormalized_accum_grads, tvars), global_step=global_step)
+          with tf.control_dependencies([minimize_op]):
+              zero_op = tf.group([accum_grad.assign(tf.zeros_like(accum_grad)) for accum_grad in accum_grads])
+      return zero_op
+
+  train_op = tf.cond(tf.math.equal(global_step % 1.0, 0),
+      lambda: apply_accumulated_gradients(accumulated_grads, grads, tvars),
+      lambda: tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)]))
 
   # Normally the global step update is done inside of `apply_gradients`.
   # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
   # a different optimizer, you should probably take this line out.
-  new_global_step = global_step + 1
+  new_global_step = global_step + 1/ga_amt
   train_op = tf.group(train_op, [global_step.assign(new_global_step)])
   return train_op,learning_rate
 
