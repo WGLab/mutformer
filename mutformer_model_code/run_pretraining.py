@@ -27,7 +27,8 @@ import metric_functions
 
 def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
                      decay_per_step, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, save_logs_every_n_steps=1, bert=modeling.BertModel, logging_dir=None):
+                     use_one_hot_embeddings, save_logs_every_n_steps=1,
+                     bert=modeling.BertModel, logging_dir=None,grad_accum_mul=1):
     """Returns `model_fn` closure for TPUEstimator."""
 
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -91,7 +92,7 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             train_op, learning_rate = optimization.create_optimizer(
-                total_loss, init_learning_rate, decay_per_step, num_warmup_steps, use_tpu)
+                total_loss, init_learning_rate, decay_per_step, num_warmup_steps, use_tpu,ga_amt=grad_accum_mul)
 
             def train_metrics(masked_lm_log_probs, masked_lm_ids, masked_lm_weights, masked_lm_logits):
                 """Computes the loss and accuracy of the model."""
