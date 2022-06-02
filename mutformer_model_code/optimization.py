@@ -72,6 +72,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
       (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
 
   accumulated_grads = [tf.Variable(lambda: tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
+  accumulation_step = tf.Variable(0.0,dtype=tf.float32,trainable=False)
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
@@ -84,15 +85,16 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
               zero_op = tf.group([accum_grad.assign(tf.zeros_like(accum_grad)) for accum_grad in accum_grads])
       return zero_op
 
-  train_op = tf.cond(tf.math.equal(global_step % 1.0, 0),
-      lambda: apply_accumulated_gradients(accumulated_grads, grads, tvars),
-      lambda: tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)]))
 
   # Normally the global step update is done inside of `apply_gradients`.
   # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
   # a different optimizer, you should probably take this line out.
-  new_global_step = global_step + 1/ga_amt
-  train_op = tf.group(train_op, [global_step.assign(new_global_step)])
+  train_op = tf.cond(tf.math.equal(accumulation_step % ga_amt, 0.0),
+                     lambda: tf.group(apply_accumulated_gradients(accumulated_grads, grads, tvars),
+                                      [accumulation_step.assign(0.0)],global_step.assign(global_step+1)),
+                     lambda: tf.group(
+                         [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)] + [
+                             accumulation_step.assign_add(1.0)]))
   return train_op,learning_rate
 
 
