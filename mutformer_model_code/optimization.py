@@ -115,7 +115,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
                      lambda: tf.group(apply_accumulated_gradients(accumulated_grads, grads, tvars),
                                       [accumulation_step.assign(0.0)],global_step.assign(global_step+1)),
                      lambda: tf.group(
-                         [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)] + [
+                         [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads) if grad is not None] + [
                              accumulation_step.assign_add(1.0)]))
   print("\n\nSTEP 3\n\n")
   return train_op,learning_rate
