@@ -57,8 +57,9 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
           beta_2=0.999,
           epsilon=epsilon,
           exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+      print("\n\nSTEP 1.5\n\n")
 
-  print("\n\nSTEP 1.5\n\n")
+
   else:
       optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,momentum=0.9)
   if use_tpu:
