@@ -95,8 +95,12 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
         output_spec = None
         if mode == tf.estimator.ModeKeys.TRAIN:
 
+            print("\n\n\nasdfasdfasdfasdfasdf BEFORE 2\n\n")
+
             train_op, learning_rate = optimization.create_optimizer(
                 total_loss, init_learning_rate, decay_per_step, num_warmup_steps, use_tpu,ga_amt=grad_accum_mul)
+
+            print("\n\n\nasdfasdfasdfasdfasdf AFTER 2\n\n")
 
             def train_metrics(masked_lm_log_probs, masked_lm_ids, masked_lm_weights, masked_lm_logits):
                 """Computes the loss and accuracy of the model."""
