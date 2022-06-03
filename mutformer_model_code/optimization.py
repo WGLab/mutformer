@@ -88,13 +88,18 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       print("\n\ninside 1\n\n")
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
+      print("\n\ninside 11\n\n")
       with tf.control_dependencies([accum_op]):
           normalized_accum_grads = [1.0 * accum_grad / ga_amt for accum_grad in
                                        accum_grads]
+          print("\n\ninside 12\n\n")
           (clippedNormalized_accum_grads, _) = tf.clip_by_global_norm(normalized_accum_grads, clip_norm=1.0)
+          print("\n\ninside 13\n\n")
           minimize_op = optimizer.apply_gradients(zip(clippedNormalized_accum_grads, tvars), global_step=global_step)
+          print("\n\ninside 14\n\n")
           with tf.control_dependencies([minimize_op]):
               zero_op = tf.group([accum_grad.assign(tf.zeros_like(accum_grad)) for accum_grad in accum_grads])
+              print("\n\ninside 15\n\n")
       print("\n\ninside 2\n\n")
       return zero_op
 
