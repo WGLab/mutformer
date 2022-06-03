@@ -91,7 +91,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
       print("\n\ninside 1\n\n")
       print(accum_grads)
       print(grads)
-      accum_op = tf.group([accum_grad.assign_add(grad) if grad is not None else None for (accum_grad, grad) in zip(accum_grads, grads)])
+      accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads) if grad is not None])
       print("\n\ninside 11\n\n")
       with tf.control_dependencies([accum_op]):
           normalized_accum_grads = [1.0 * accum_grad / ga_amt if accum_grad is not None else None for accum_grad in
