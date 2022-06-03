@@ -87,6 +87,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       print("\n\ninside 1\n\n")
+      print(accum_grads)
+      print(grads)
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
       print("\n\ninside 11\n\n")
       with tf.control_dependencies([accum_op]):
