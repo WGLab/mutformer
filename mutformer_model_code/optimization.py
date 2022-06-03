@@ -23,12 +23,10 @@ import tensorflow as tf
 
 def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None, grad_mask=None,
                      weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True,ga_amt=1):
-  print("\n\nSTEP -1\n\n")
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
 
   learning_rate = init_lr - (tf.abs(decay_per_step) * tf.cast(global_step,tf.float32))
-  print("\n\nSTEP -0.5\n\n")
 
   # Implements linear warmup. I.e., if global_step < num_warmup_steps, the
   # learning rate will be `global_step/num_warmup_steps * init_lr`.
@@ -46,7 +44,6 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
     learning_rate = (
         (1.0 - is_warmup) * learning_rate + is_warmup * warmup_learning_rate)
 
-  print("\n\nSTEP 0\n\n")
 
   # It is recommended that you use this optimizer for fine tuning, since this
   # is how the model was trained (note that the Adam m and v momentum variables
@@ -59,7 +56,6 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
           beta_2=0.999,
           epsilon=epsilon,
           exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
-      print("\n\nSTEP 1.5\n\n")
 
 
   else:
@@ -75,8 +71,6 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if grad_mask is not None:
       grads = [g*grad_mask[n] for n,g in enumerate(grads)]
 
-  print("\n\nSTEP 1\n\n")
-
 
   # This is how the model was pre-trained.
   if clip:
@@ -85,26 +79,15 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   accumulated_grads = [tf.Variable(lambda: tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
   accumulation_step = tf.Variable(0.0,dtype=tf.float32,trainable=False)
 
-  print("\n\nSTEP 2\n\n")
-
   def apply_accumulated_gradients(accum_grads, grads, tvars):
-      print("\n\ninside 1\n\n")
-      print(accum_grads)
-      print(grads)
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads) if grad is not None])
-      print("\n\ninside 11\n\n")
       with tf.control_dependencies([accum_op]):
           normalized_accum_grads = [1.0 * accum_grad / ga_amt if accum_grad is not None else None for accum_grad in
                                        accum_grads]
-          print("\n\ninside 12\n\n")
           (clippedNormalized_accum_grads, _) = tf.clip_by_global_norm(normalized_accum_grads, clip_norm=1.0)
-          print("\n\ninside 13\n\n")
           minimize_op = optimizer.apply_gradients(zip(clippedNormalized_accum_grads, tvars), global_step=global_step)
-          print("\n\ninside 14\n\n")
           with tf.control_dependencies([minimize_op]):
               zero_op = tf.group([accum_grad.assign(tf.zeros_like(accum_grad)) for accum_grad in accum_grads])
-              print("\n\ninside 15\n\n")
-      print("\n\ninside 2\n\n")
       return zero_op
 
 
@@ -117,7 +100,6 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
                      lambda: tf.group(
                          [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads) if grad is not None] + [
                              accumulation_step.assign_add(1.0)]))
-  print("\n\nSTEP 3\n\n")
   return train_op,learning_rate
 
 
