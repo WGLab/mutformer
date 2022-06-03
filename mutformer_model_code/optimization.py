@@ -44,6 +44,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
     learning_rate = (
         (1.0 - is_warmup) * learning_rate + is_warmup * warmup_learning_rate)
 
+  print("\n\nSTEP 0\n\n")
+
   # It is recommended that you use this optimizer for fine tuning, since this
   # is how the model was trained (note that the Adam m and v momentum variables
   # are NOT loaded from init_checkpoint).
@@ -55,6 +57,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
           beta_2=0.999,
           epsilon=epsilon,
           exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+
+  print("\n\nSTEP 1.5\n\n")
   else:
       optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,momentum=0.9)
   if use_tpu:
@@ -63,8 +67,10 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if tvars is None:
       tvars = tf.trainable_variables()
   grads = tf.gradients(loss, tvars)
-  if grad_mask:
+  if grad_mask is not None:
       grads = [g*grad_mask[n] for n,g in enumerate(grads)]
+
+  print("\n\nSTEP 1\n\n")
 
 
   # This is how the model was pre-trained.
@@ -73,6 +79,8 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
 
   accumulated_grads = [tf.Variable(lambda: tf.zeros_like(t_var.initialized_value()), trainable=False) for t_var in tvars]
   accumulation_step = tf.Variable(0.0,dtype=tf.float32,trainable=False)
+
+  print("\n\nSTEP 2\n\n")
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
@@ -95,6 +103,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
                      lambda: tf.group(
                          [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)] + [
                              accumulation_step.assign_add(1.0)]))
+
   return train_op,learning_rate
 
 
