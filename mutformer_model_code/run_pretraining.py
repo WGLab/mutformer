@@ -47,6 +47,8 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
 
         is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
+        print("\n\n\nasdfasdfasdfasdfasdf BEFORE\n\n")
+
         model = bert(
             config=bert_config,
             is_training=is_training,
@@ -54,6 +56,8 @@ def model_fn_builder(bert_config, init_checkpoint, init_learning_rate,
             input_mask=input_mask,
             token_type_ids=segment_ids,
             use_one_hot_embeddings=use_one_hot_embeddings)
+
+        print("\n\n\nasdfasdfasdfasdfasdf AFTER\n\n")
 
         (masked_lm_loss, masked_lm_log_probs, masked_lm_logits) = get_masked_lm_output(
             bert_config, model.get_sequence_output(), model.get_embedding_table(),
