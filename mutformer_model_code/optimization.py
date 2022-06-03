@@ -86,6 +86,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   print("\n\nSTEP 2\n\n")
 
   def apply_accumulated_gradients(accum_grads, grads, tvars):
+      print("\n\ninside 1\n\n")
       accum_op = tf.group([accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accum_grads, grads)])
       with tf.control_dependencies([accum_op]):
           normalized_accum_grads = [1.0 * accum_grad / ga_amt for accum_grad in
@@ -94,6 +95,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
           minimize_op = optimizer.apply_gradients(zip(clippedNormalized_accum_grads, tvars), global_step=global_step)
           with tf.control_dependencies([minimize_op]):
               zero_op = tf.group([accum_grad.assign(tf.zeros_like(accum_grad)) for accum_grad in accum_grads])
+      print("\n\ninside 2\n\n")
       return zero_op
 
 
@@ -106,7 +108,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
                      lambda: tf.group(
                          [accum_grad.assign_add(grad) for (accum_grad, grad) in zip(accumulated_grads, grads)] + [
                              accumulation_step.assign_add(1.0)]))
-
+  print("\n\nSTEP 3\n\n")
   return train_op,learning_rate
 
 
