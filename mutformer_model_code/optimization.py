@@ -23,10 +23,12 @@ import tensorflow as tf
 
 def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, tvars = None, grad_mask=None,
                      weight_decay=0.01,epsilon=1e-4,optimizer_name="adam",clip=True,ga_amt=1):
+  print("\n\nSTEP -1\n\n")
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
 
   learning_rate = init_lr - (tf.abs(decay_per_step) * tf.cast(global_step,tf.float32))
+  print("\n\nSTEP -0.5\n\n")
 
   # Implements linear warmup. I.e., if global_step < num_warmup_steps, the
   # learning rate will be `global_step/num_warmup_steps * init_lr`.
