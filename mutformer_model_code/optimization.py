@@ -66,8 +66,7 @@ def create_optimizer(loss, init_lr, decay_per_step, num_warmup_steps, use_tpu, t
   if tvars is None:
       tvars = tf.trainable_variables()
   grads = tf.gradients(loss, tvars)
-  for grad,tvar in zip(grads,tvars):
-      print(grad,tvar,loss)
+
   if grad_mask is not None:
       grads = [g*grad_mask[n] for n,g in enumerate(grads)]
 
