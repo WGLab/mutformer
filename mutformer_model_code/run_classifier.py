@@ -91,8 +91,7 @@ class DataProcessor(object):
     """Gets the list of labels for this data set."""
     raise NotImplementedError()
 
-  @classmethod
-  def _read_tsv(cls, input_file, read_range=None,quotechar=None):
+  def _read_tsv(self, input_file, read_range=None,quotechar=None):
     """Reads a tab separated value file."""
     with tf.gfile.Open(input_file, "r") as f:
       lines = []
