@@ -98,11 +98,10 @@ class DataProcessor(object):
       reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
       lines = []
       for n,line in enumerate(tqdm(reader,"reading tsv")):
+        if not line: continue
         if read_range:
-            if n<read_range[0]:
-                continue
-            elif n>=read_range[1]:
-                break
+            if n<read_range[0]: continue
+            elif n>=read_range[1]: break
         lines.append(line)
       return lines
 
