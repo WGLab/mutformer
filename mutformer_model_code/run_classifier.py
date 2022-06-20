@@ -95,10 +95,11 @@ class DataProcessor(object):
   def _read_tsv(cls, input_file, read_range=None,quotechar=None):
     """Reads a tab separated value file."""
     with tf.gfile.Open(input_file, "r") as f:
-      reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
       lines = []
-      for n,line in enumerate(tqdm(reader,"reading tsv")):
+      for n,line in enumerate(tqdm(f,"reading tsv")):
+        line = line.strip()
         if not line: continue
+        line = line.split("\t")
         if read_range:
             if n<read_range[0]: continue
             elif n>=read_range[1]: break
