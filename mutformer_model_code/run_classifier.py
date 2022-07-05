@@ -392,6 +392,12 @@ def file_based_convert_examples_to_features(
     features["input_mask"] = create_int_feature(feature.input_mask)
     features["segment_ids"] = create_int_feature(feature.segment_ids)
     features["label_ids"] = create_int_feature([feature.label_id])
+    def remake_ex_data_bc_im_stupid(data): ##<< DELTE LATER
+        if len(data)<27:
+            feature.ex_data = data[:15]+[0.0]+data[15:]
+    remake_ex_data_bc_im_stupid(feature.ex_data)
+    if feature.ex_data<27:
+        input("????????????????WHAT???")
     if feature.ex_data:
         features["ex_data"] = create_float_feature(feature.ex_data)
     features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
@@ -411,7 +417,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
           "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
           "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
           "label_ids": tf.FixedLenFeature([], tf.int64),
-          "ex_data": tf.VarLenFeature(tf.float32),
+          "ex_data": tf.FixedLenFeature([pred_num],tf.float32),
           "is_real_example": tf.FixedLenFeature([], tf.int64),
       }
   else:
@@ -435,10 +441,6 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
         if t.dtype == tf.int64:
             t = tf.to_int32(t)
 
-        if name == "ex_data":  ##<< DELETE LATER
-            def f1():
-                return tf.concat([tf.slice(t.values, [0], [15]), tf.constant([0], dtype=tf.float32),tf.slice(t.values, [15], [-1])], 0)
-            t = tf.cond(tf.equal(tf.shape(t.values),tf.TensorShape([pred_num]))[0],lambda: t.values,f1)##for my stupidity
         example[name] = t
     return example
 
