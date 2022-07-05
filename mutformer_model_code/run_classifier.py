@@ -396,7 +396,7 @@ def file_based_convert_examples_to_features(
         if len(data)<27:
             feature.ex_data = data[:15]+[0.0]+data[15:]
     remake_ex_data_bc_im_stupid(feature.ex_data)
-    if feature.ex_data<27:
+    if len(feature.ex_data)<27:
         input("????????????????WHAT???")
     if feature.ex_data:
         features["ex_data"] = create_float_feature(feature.ex_data)
