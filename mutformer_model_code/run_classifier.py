@@ -411,7 +411,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
           "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
           "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
           "label_ids": tf.FixedLenFeature([], tf.int64),
-          "ex_data": tf.FixedLenFeature([pred_num],tf.float32),
+          "ex_data": tf.VarLenFeature(tf.float32),
           "is_real_example": tf.FixedLenFeature([], tf.int64),
       }
   else:
@@ -429,12 +429,17 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 
     # tf.Example only supports tf.int64, but the TPU only supports tf.int32.
     # So cast all int64 to int32.
-    for name in list(example.keys()):
-      t = example[name]
-      if t.dtype == tf.int64:
-        t = tf.to_int32(t)
-      example[name] = t
 
+    for name in example.keys():
+        t = example[name]
+        if t.dtype == tf.int64:
+            t = tf.to_int32(t)
+
+        if name == "ex_data":  ##<< DELETE LATER
+            def f1():
+                return tf.concat([tf.slice(t.values, [0], [15]), tf.constant([0], dtype=tf.float32),tf.slice(t.values, [15], [-1])], 0)
+            t = tf.cond(tf.equal(tf.shape(t.values),tf.TensorShape([pred_num]))[0],lambda: t.values,f1)##for my stupidity
+        example[name] = t
     return example
 
   def input_fn(params):
