@@ -18,7 +18,7 @@ Best performing MutFormer models for functional effect prediction:
 https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
 
 
-#### To download a full prediction of a mostly complete collection of all possible missense proteins in the humane proteome, we have included a file as an asset called "hg19_mutformer.zip" 
+#### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as an asset called "hg19_mutformer.zip" 
 
 #### Alternatively, a google drive link: https://drive.google.com/file/d/1ObBEn-wcQwoebD7glx8bWiWILfzfnlIO/view?usp=sharing
 
