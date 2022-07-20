@@ -10,15 +10,16 @@ MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | https://drive.google.com/drive/fold
 MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/folders/1-LXP5dpO071JYvbxRaG7hD9vbcp0aWmf?usp=sharing
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
 MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
+MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | TBD
 
-MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models the official models.
+MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
-Best performing MutFormer models for functional effect prediction:
+Best performing MutFormer models for deleteriousness prediction:
 
-https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
+TBD
 
 
-#### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as an asset called "hg19_mutformer.zip" 
+#### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as a release asset called "hg19_mutformer.zip" 
 
 #### Alternatively, a google drive link: https://drive.google.com/file/d/1950d_f3y9Q6C5I62ODjHB6C8biT8whY7/view?usp=sharing
 
