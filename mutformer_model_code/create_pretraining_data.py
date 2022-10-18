@@ -113,7 +113,7 @@ def write_instance_to_example_files(train_instances, tokenizer, max_seq_length,
       continue
 
     while len(input_ids) < max_seq_length:
-      input_ids.append(0)
+      input_ids.append(0) ##NOTE TO SELF TO CHANGE THIS PADDING MECHNIASM LATER
       input_mask.append(0)
       segment_ids.append(0)
 
