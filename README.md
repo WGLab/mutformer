@@ -26,6 +26,8 @@ TBD
 
 ## To run MutFormer:
 
+MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, a folder titled "mutformer_inference" will provide code to run a trained mutformer model on both a local machine and Colab Notebook.
+
 ### Pretraining:
 
 Under the folder titled "mutformer_pretraining," first open "mutformer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
@@ -48,6 +50,10 @@ Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning
 Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
 
 Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation (can also evaluate or predict after the fact).
+
+### Inference
+
+To run the trained MutFormer model 
 
 ## Input Data format guidelines:
 
