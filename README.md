@@ -10,20 +10,23 @@ MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | https://drive.google.com/drive/fold
 MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/folders/1-LXP5dpO071JYvbxRaG7hD9vbcp0aWmf?usp=sharing
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
 MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
+MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | TBD
 
-MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models the official models.
+MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
-Best performing MutFormer models for functional effect prediction:
+Best performing MutFormer models for deleteriousness prediction:
 
-https://drive.google.com/drive/folders/1tsC0lqzbx3wR_jOer9GuGjeJnnYL4RND?usp=sharing
+TBD
 
 
-#### To download a full prediction of a mostly complete collection of all possible missense proteins in the humane proteome, we have included a file as an asset called "hg19_mutformer.zip" 
+#### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as a release asset called "hg19_mutformer.zip" 
 
-#### Alternatively, a google drive link: https://drive.google.com/file/d/1ObBEn-wcQwoebD7glx8bWiWILfzfnlIO/view?usp=sharing
+#### Alternatively, a google drive link: https://drive.google.com/file/d/1950d_f3y9Q6C5I62ODjHB6C8biT8whY7/view?usp=sharing
 
 
 ## To run MutFormer:
+
+MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, will provide both colab/cloud TPU and local machine support.
 
 ### Pretraining:
 
@@ -40,32 +43,17 @@ To view pretraining graphs or download the checkpoints from GCS, use the noteboo
 
 ### Finetuning
 
-For finetuning, there is only one set of files for three modes, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, RE for single sequence strategy, and NER for pre residue strategy).
+For finetuning, there is only one set of files for four modes, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, MRPC_w_preds for MRPC with external predictions, RE for single sequence strategy, and NER for pre residue strategy).
 
 Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
 
 Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
 
-Finally, alongside running mutformer_run_finetuning "mutformer_finetuning_benchmark_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation (can also evaluate or predict after the fact).
 
-To view finetuning graphs or plot ROC curves for the predictions, use the notebook titled “mutformer_processing_and_viewing_finetuning_pathogenic_variant_classification_(2_class)_results.ipynb.”
+### Inference
 
-## Model top performances on test set for Pathogenicity Prediction without external data:
-
-Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
------------|---------------
-MutBERT8L | 0.859
-MutBERT10L | 0.870
-MutFormer8L | 0.902
-MutFormer10L | 0.907
-MutFormer12L | 0.909
-
-## MutFormer top performance on test set for Pathogenicity Prediction with external data
-
-Model Name | Receiver Operator Characteristic Area Under Curve (ROC AUC) 
------------|---------------
-MutFormer12L (excluding varity and MVP) | 0.931
-MutFormer12L/MutFormer10L (including varity and MVP) | 0.932
+To run the trained MutFormer model 
 
 ## Input Data format guidelines:
 

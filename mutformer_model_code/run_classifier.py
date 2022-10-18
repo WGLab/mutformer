@@ -91,23 +91,35 @@ class DataProcessor(object):
     """Gets the list of labels for this data set."""
     raise NotImplementedError()
 
-  @classmethod
-  def _read_tsv(cls, input_file, read_range=None,quotechar=None):
+  def _read_tsv(self, input_file, read_range=None,quotechar=None):
     """Reads a tab separated value file."""
     with tf.gfile.Open(input_file, "r") as f:
-      reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
       lines = []
-      for n,line in enumerate(tqdm(reader,"reading tsv")):
+      for n,line in enumerate(tqdm(f,"reading tsv")):
+        line = line.strip()
+        if not line:
+            read_range[0]+=1
+            read_range[1]+=1
+            continue
         if read_range:
-            if n<read_range[0]:
-                continue
-            elif n>=read_range[1]:
-                break
+            if n<read_range[0]: continue
+            elif n>=read_range[1]: break
+        line = line.split("\t")
+
         lines.append(line)
       return lines
 
 
 class MrpcProcessor(DataProcessor):
+  def get_train_file(self,data_dir):
+      return os.path.join(data_dir, "train.tsv")
+
+  def get_dev_file(self,data_dir):
+      return os.path.join(data_dir, "dev.tsv")
+
+  def get_test_file(self,data_dir,dataset):
+      return os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv")
+
   def get_train_examples(self, data_dir, read_range=None):
     """See base class."""
     return self._create_examples(
@@ -141,71 +153,90 @@ class MrpcProcessor(DataProcessor):
     return examples
 
 class MrpcWithExDataProcessor(DataProcessor):
-  def get_train_examples(self, data_dir, read_range=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
+    def get_train_file(self, data_dir):
+        return os.path.join(data_dir, "train.tsv")
 
-  def get_dev_examples(self, data_dir, read_range=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
+    def get_dev_file(self, data_dir):
+        return os.path.join(data_dir, "dev.tsv")
 
-  def get_test_examples(self, data_dir, read_range=None,dataset=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
+    def get_test_file(self, data_dir, dataset):
+        return os.path.join(data_dir, f"test{'_' + dataset if dataset else ''}.tsv")
 
-  def get_labels(self):
-    """See base class."""
-    return ["0", "1"]
+    def get_train_examples(self, data_dir, read_range=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
 
-  def _create_examples(self, lines, set_type):
-    """Creates examples for the training and dev sets."""
-    examples = []
-    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
-      guid = "%s-%s" % (set_type, i)
-      text_a = tokenization.convert_to_unicode(line[1])
-      text_b = tokenization.convert_to_unicode(line[2])
-      label = tokenization.convert_to_unicode(line[0])
-      ex_data = tokenization.convert_to_unicode(line[3])
-      pos = tokenization.convert_to_unicode(line[4])
-      examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, ex_data=ex_data, pos=pos))
-    return examples
+    def get_dev_examples(self, data_dir, read_range=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
+
+    def get_test_examples(self, data_dir, read_range=None,dataset=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(tqdm(lines,"creating_examples")):
+          guid = "%s-%s" % (set_type, i)
+          text_a = tokenization.convert_to_unicode(line[1])
+          text_b = tokenization.convert_to_unicode(line[2])
+          label = tokenization.convert_to_unicode(line[0])
+          ex_data = tokenization.convert_to_unicode(line[3])
+          pos = tokenization.convert_to_unicode(line[4])
+          examples.append(
+              InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, ex_data=ex_data, pos=pos))
+        return examples
 
 
 class REProcessor(DataProcessor):
-  def get_train_examples(self, data_dir, read_range=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
+    def get_train_file(self, data_dir):
+        return os.path.join(data_dir, "train.tsv")
 
-  def get_dev_examples(self, data_dir, read_range=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
+    def get_dev_file(self, data_dir):
+        return os.path.join(data_dir, "dev.tsv")
 
-  def get_test_examples(self, data_dir, read_range=None,dataset=None):
-    """See base class."""
-    return self._create_examples(
-        self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
+    def get_test_file(self, data_dir, dataset):
+        return os.path.join(data_dir, f"test{'_' + dataset if dataset else ''}.tsv")
 
-  def get_labels(self):
-    """See base class."""
-    return ["0", "1"]
 
-  def _create_examples(self, lines, set_type):
-    """Creates examples for the training and dev sets."""
-    examples = []
-    for (i, line) in enumerate(tqdm(lines,"creating_examples")):
-      guid = "%s-%s" % (set_type, i)
-      text_a = tokenization.convert_to_unicode(line[0])
-      label = tokenization.convert_to_unicode(line[1])
-      pos = tokenization.convert_to_unicode(line[2])
-      examples.append(
-          InputExample(guid=guid, text_a=text_a, text_b=None, label=label, pos=pos))
-    return examples
+    def get_train_examples(self, data_dir, read_range=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "train.tsv"),read_range=read_range), "train")
+
+    def get_dev_examples(self, data_dir, read_range=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "dev.tsv"),read_range=read_range), "dev")
+
+    def get_test_examples(self, data_dir, read_range=None,dataset=None):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, f"test{'_'+dataset if dataset else ''}.tsv"),read_range=read_range), "test")
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(tqdm(lines,"creating_examples")):
+          guid = "%s-%s" % (set_type, i)
+          text_a = tokenization.convert_to_unicode(line[0])
+          label = tokenization.convert_to_unicode(line[1])
+          pos = tokenization.convert_to_unicode(line[2])
+          examples.append(
+              InputExample(guid=guid, text_a=text_a, text_b=None, label=label, pos=pos))
+        return examples
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
                            tokenizer,create_altered_data=False):
@@ -361,6 +392,12 @@ def file_based_convert_examples_to_features(
     features["input_mask"] = create_int_feature(feature.input_mask)
     features["segment_ids"] = create_int_feature(feature.segment_ids)
     features["label_ids"] = create_int_feature([feature.label_id])
+    def remake_ex_data_bc_im_stupid(data): ##<< DELTE LATER
+        if len(data)<27:
+            feature.ex_data = data[:15]+[0.0]+data[15:]
+    remake_ex_data_bc_im_stupid(feature.ex_data)
+    if len(feature.ex_data)<27:
+        input("????????????????WHAT???")
     if feature.ex_data:
         features["ex_data"] = create_float_feature(feature.ex_data)
     features["is_real_example"] = create_int_feature([int(feature.is_real_example)])
@@ -398,12 +435,13 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 
     # tf.Example only supports tf.int64, but the TPU only supports tf.int32.
     # So cast all int64 to int32.
-    for name in list(example.keys()):
-      t = example[name]
-      if t.dtype == tf.int64:
-        t = tf.to_int32(t)
-      example[name] = t
 
+    for name in example.keys():
+        t = example[name]
+        if t.dtype == tf.int64:
+            t = tf.to_int32(t)
+
+        example[name] = t
     return example
 
   def input_fn(params):

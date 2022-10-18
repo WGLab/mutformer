@@ -123,6 +123,15 @@ class DataProcessor(object):
 class NERProcessor(DataProcessor):
     """Processor for the ner data set (GLUE version)."""
 
+    def get_train_file(self, data_dir):
+        return os.path.join(data_dir, "train.tsv")
+
+    def get_dev_file(self, data_dir):
+        return os.path.join(data_dir, "dev.tsv")
+
+    def get_test_file(self, data_dir, dataset):
+        return os.path.join(data_dir, f"test{'_' + dataset if dataset else ''}.tsv")
+
     def get_train_examples(self, data_dir, read_range=None):
         """See base class."""
         return self._create_examples(
