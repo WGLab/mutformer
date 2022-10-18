@@ -26,7 +26,7 @@ TBD
 
 ## To run MutFormer:
 
-MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, a folder titled "mutformer_inference" will provide code to run a trained mutformer model on both a local machine and Colab Notebook.
+MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, will provide both colab/cloud TPU and local machine support.
 
 ### Pretraining:
 
