@@ -110,7 +110,7 @@ L V L E G R V G E A I E T T Q R F Y P G L L E H N P N L L F M L K C R Q F V E M 
 G T D S E V R S L S S R S P K S Q D S Y P G S P S L S F A R V D D Y L H J
 ```
 
-### Finetuning
+### Finetuning/Inference
 #### Single Sequence Classification (RE)
 
 The format should be a tsv file with each line containing (tab delimited): 
