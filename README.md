@@ -53,7 +53,35 @@ Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_
 
 ### Inference
 
-To run the trained MutFormer model 
+To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab, for which a Colab notebook is provided, or run inference locally, for which a python script is provided.
+
+#### Local Run
+
+To run MutFormer for inference locally, download MutFormer code and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Run the script "run_inference.py," specifying the parameters.
+
+Parameters for run_inference.py include:
+
+--input_file: Input raw text file for running inference (or comma-separated list of files) (should be formatted corresponding to the test mode chosen from the Finetuning section in the README).
+--output_file: File to output inference results to (or comma-separated list of files).
+--model_folder: Folder where the model checkpoint and config file is stored.
+--model_architecture: Model architecture of the model checkpoint specified (BertModel indicates the original BERT, BertModelModified indicates MutFormer's architecture without integrated convs, MutFormer_embedded_convs indicates MutFormer with integrated convolutions).
+--vocab_file: The vocabulary file that the BERT model was trained on.
+--batch_size: Number of lines to batch together at a time when performing inference.
+
+
+##### Example
+
+To run a basic example, download the "basic_example.zip" from "mutformer_inference/local_run," navigate through the Terminal to the unzipped folder, and run the following command:
+
+```
+python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=64 
+```
+
+The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
+
+#### Cloud Run
+
+<UNFINISHED>
 
 ## Input Data format guidelines:
 
