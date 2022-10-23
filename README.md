@@ -79,7 +79,7 @@ Parameters for run_inference.py include:
 To run a basic example, download the "basic_example.zip" from "mutformer_inference/local_run," navigate through the Terminal to the unzipped folder, and run the following command:
 
 ```
-python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=64 --max_seq_length=1024 --use_ex_data=False
+python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=8 --max_seq_length=1024 --use_ex_data=False
 ```
 
 The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
