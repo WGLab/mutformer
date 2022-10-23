@@ -49,11 +49,13 @@ Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_
 
 ### Inference
 
-To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab, for which a Colab notebook is provided, or run inference locally, for which a python script is provided.
+<To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab, for which a Colab notebook is provided, or run inference locally, for which a python script is provided.>
+
+To run the trained MutFormer model, one can run inference locally using a python script provided:
 
 #### Local Run
 
-To run MutFormer for inference locally, download MutFormer code and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Run the script "run_inference.py," specifying the parameters.
+To run MutFormer for inference locally, download/clone the MutFormer repo and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Run the script "run_inference.py," specifying the parameters.
 
 Parameters for run_inference.py include:
 
