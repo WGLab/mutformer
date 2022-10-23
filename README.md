@@ -14,10 +14,6 @@ MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | TBD
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
-Best performing MutFormer models for deleteriousness prediction:
-
-TBD
-
 
 #### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as a release asset called "hg19_mutformer.zip" 
 
@@ -84,7 +80,7 @@ python run_inference.py --input_file="input_file.txt" --output_file="output_file
 
 The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
 
-#### Cloud Run
+<#### Cloud Run>
 
 <UNFINISHED>
 
