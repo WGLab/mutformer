@@ -174,7 +174,7 @@ Example file:
 0    L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    0.0 0.012 0.0 0.0
 ```
 
-###Inference
+### Inference
 
 When compiling data for inference, data should be prepared in the following way:
     
