@@ -190,14 +190,45 @@ The format should be a tsv file with each line containing (tab delimited):
 1. reference sequence
 2. mutated sequence
 3. If using external data, specify the option when running the inference scripts, and include external data (float values separated by spaces) in the data.
-    For the trained MutFormer models, external data was included according to the DBNSFP database's ordering of external predictions.
+* For the trained MutFormer models, external data was included according to the following format: 
+* All predictions were normalized to values between 1 and 2 by calculating each individual value, if provided, as 1+((provided_value + minimum value in all of DBNSFP) / (maximum value in all of DBNSFP-minimum value in all of DBNSFP)). All values that were missing were assigned a value of 0.
+* The data was gathered from the DBNSFPv3 dataset; all columns used for MutFormer are (27 total): 
+    1. SIFT_score, 
+    2. Polyphen2_HDIV_score, 
+    3. Polyphen2_HVAR_score, 
+    4. LRT_score, 
+    5. MutationTaster_score, 
+    6. MutationAssessor_score, 
+    7. FATHMM_score, 
+    8. PROVEAN_score, 
+    9. VEST3_score	
+    10. CADD_raw	
+    11. CADD_phred
+    12. DANN_score	
+    13. fathmm-MKL_coding_score
+    14. MetaSVM_score	
+    15. MetaLR_score	
+    16. integrated_fitCons_score	
+    17. GERP++_RS	
+    18. phyloP7way_vertebrate	
+    19. phyloP20way_mammalian	
+    20. phastCons7way_vertebrate	
+    21. phastCons20way_mammalian	
+    22. SiPhy_29way_logOdds	
+    23. VARITY_R	
+    24. VARITY_ER	
+    25. VARITY_R_LOO	
+    26. VARITY_ER_LOO	
+    27. MVP_score	
+
+SIFT_score	SIFT_pred	Polyphen2_HDIV_score	Polyphen2_HDIV_pred	Polyphen2_HVAR_score	Polyphen2_HVAR_pred	LRT_score	LRT_pred	MutationTaster_score	MutationTaster_pred	MutationAssessor_score	MutationAssessor_pred	FATHMM_score	FATHMM_pred	PROVEAN_score	PROVEAN_pred	VEST3_score	CADD_raw	CADD_phred	DANN_score	fathmm-MKL_coding_score	fathmm-MKL_coding_pred	MetaSVM_score	MetaSVM_pred	MetaLR_score	MetaLR_pred	integrated_fitCons_score	integrated_confidence_value	GERP++_RS	phyloP7way_vertebrate	phyloP20way_mammalian	phastCons7way_vertebrate	phastCons20way_mammalian	SiPhy_29way_logOdds	VARITY_R	VARITY_ER	VARITY_R_LOO	VARITY_ER_LOO	MVP_score	
 
 Example file (with external data):
 ```
-D W A Y A A S K E S H A T L V F H N L L G E I D Q Q Y S R F    D W A Y A A S K E S H A T L V F Y N L L G E I D Q Q Y S R F    0.6 0.137 0.5 0.9812
-S A V P P F S C G V I S T L R S R E E G A V D K S Y C T L L    S A V P P F S C G V I S T L R S W E E G A V D K S Y C T L L    0.0 0.101 0.1 0.0001
-L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T    1.0 0.986 0.8 0.9995
-L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    0.0 0.012 0.0 0.0
+D W A Y A A S K E S H A T L V F H N L L G E I D Q Q Y S R F    D W A Y A A S K E S H A T L V F Y N L L G E I D Q Q Y S R F    1.6 1.137 1.5 1.9812
+S A V P P F S C G V I S T L R S R E E G A V D K S Y C T L L    S A V P P F S C G V I S T L R S W E E G A V D K S Y C T L L    1.0 1.101 1.1 1.0001
+L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T    2.0 1.986 1.8 1.9995
+L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    1.0 1.012 1.0 1.0
 ```
     
 Example file (without external data):
