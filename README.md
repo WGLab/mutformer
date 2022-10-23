@@ -80,7 +80,7 @@ python run_inference.py --input_file="input_file.txt" --output_file="output_file
 
 The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
 
-<#### Cloud Run>
+<Cloud Run>
 
 <UNFINISHED>
 
