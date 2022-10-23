@@ -73,6 +73,7 @@ Parameters for run_inference.py include:
 
 --using_ex_data: set this to True if external data is being included as part of the input data.
 
+The results of inference will be written into the specified output_file, with each row corresponding to a 2 label probability (first index is probability for benign, second index is probability for pathogenic) prediction of the pathogenicity for each of the inputs.
 
 ##### Example
 
