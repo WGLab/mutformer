@@ -62,10 +62,15 @@ To run MutFormer for inference locally, download MutFormer code and navigate via
 Parameters for run_inference.py include:
 
 --input_file: Input raw text file for running inference (or comma-separated list of files) (should be formatted corresponding to the test mode chosen from the Finetuning section in the README).
+
 --output_file: File to output inference results to (or comma-separated list of files).
+
 --model_folder: Folder where the model checkpoint and config file is stored.
+
 --model_architecture: Model architecture of the model checkpoint specified (BertModel indicates the original BERT, BertModelModified indicates MutFormer's architecture without integrated convs, MutFormer_embedded_convs indicates MutFormer with integrated convolutions).
+
 --vocab_file: The vocabulary file that the BERT model was trained on.
+
 --batch_size: Number of lines to batch together at a time when performing inference.
 
 
