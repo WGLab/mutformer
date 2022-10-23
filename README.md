@@ -10,7 +10,7 @@ MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | https://drive.google.com/drive/fold
 MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/folders/1-LXP5dpO071JYvbxRaG7hD9vbcp0aWmf?usp=sharing
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
 MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
-MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | TBD
+MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | https://drive.google.com/drive/folders/1jcK2mckj_oJaR1QQVzjBuoOEJC5SWDu5?usp=sharing
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
@@ -68,6 +68,10 @@ Parameters for run_inference.py include:
 --vocab_file: The vocabulary file that the BERT model was trained on.
 
 --batch_size: Number of lines to batch together at a time when performing inference.
+
+--max_seq_length: Maximum sequence length to pad to; should be greater than or equal to the three more than twice the length of the longest input amino acid sequence.
+
+--using_ex_data: set this to True if external data is being included as part of the input data.
 
 
 ##### Example
