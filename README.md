@@ -190,7 +190,9 @@ The format should be a tsv file with each line containing (tab delimited):
 1. reference sequence
 2. mutated sequence
 3. If using external data, specify the option when running the inference scripts, and include external data (float values separated by spaces) in the data.
-* For the trained MutFormer models, external data was included according to the following format: 
+
+For the trained MutFormer models, external data was included according to the following format: 
+
 * All predictions were normalized to values between 1 and 2 by calculating each individual value, if provided, as 1+((provided_value + minimum value in all of DBNSFP) / (maximum value in all of DBNSFP-minimum value in all of DBNSFP)). All values that were missing were assigned a value of 0.
 * The data was gathered from the DBNSFPv3 dataset; all columns used for MutFormer are (27 total): 
     1. SIFT_score, 
