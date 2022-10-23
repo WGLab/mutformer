@@ -110,7 +110,7 @@ L V L E G R V G E A I E T T Q R F Y P G L L E H N P N L L F M L K C R Q F V E M 
 G T D S E V R S L S S R S P K S Q D S Y P G S P S L S F A R V D D Y L H J
 ```
 
-### Finetuning/Inference
+### Finetuning training (not inference)
 #### Single Sequence Classification (RE)
 
 The format should be a tsv file with each line containing (tab delimited): 
@@ -159,7 +159,7 @@ Example file:
 ```
 
 #### Paired Sequence Classification With External Data (MRPC_w_ex_data)
-
+    
 The format should be a tsv file with each line containing (tab delimited): 
 1. label (1 for pathogenic and 0 for benign)
 2. reference sequence
@@ -174,9 +174,32 @@ Example file:
 0    L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    0.0 0.012 0.0 0.0
 ```
 
+###Inference
 
+When compiling data for inference, data should be prepared in the following way:
+    
+The format should be a tsv file with each line containing (tab delimited): 
+1. reference sequence
+2. mutated sequence
+3. If using external data, specify the option when running the inference scripts, and include external data (float values separated by spaces) in the data.
+    For the trained MutFormer models, external data was included according to the DBNSFP database's ordering of external predictions.
 
-
+Example file (with external data):
+```
+D W A Y A A S K E S H A T L V F H N L L G E I D Q Q Y S R F    D W A Y A A S K E S H A T L V F Y N L L G E I D Q Q Y S R F    0.6 0.137 0.5 0.9812
+S A V P P F S C G V I S T L R S R E E G A V D K S Y C T L L    S A V P P F S C G V I S T L R S W E E G A V D K S Y C T L L    0.0 0.101 0.1 0.0001
+L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T    1.0 0.986 0.8 0.9995
+L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L    0.0 0.012 0.0 0.0
+```
+    
+Example file (without external data):
+```
+D W A Y A A S K E S H A T L V F H N L L G E I D Q Q Y S R F    D W A Y A A S K E S H A T L V F Y N L L G E I D Q Q Y S R F
+S A V P P F S C G V I S T L R S R E E G A V D K S Y C T L L    S A V P P F S C G V I S T L R S W E E G A V D K S Y C T L L
+L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E P T Q S K L V H L E P L T E A E A S E A T
+L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L
+```
+    
 # Citation
 
 If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
