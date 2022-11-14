@@ -14,10 +14,23 @@ MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | https://dri
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
+### Precomputed Scores for MutFormer
 
-#### To download a full prediction of a complete collection of all possible known missense protein-altering mutations in the humane proteome, we have included a file as a release asset called "hg19_mutformer.zip" 
+We have included precomputed scores for all known missense protein-altering mutations in the humane proteome in the DBNSFP42 database (hg19 build). We have included a file as a release asset called "hg19_mutformer.zip."
 
 #### Alternatively, a google drive link: https://drive.google.com/file/d/1950d_f3y9Q6C5I62ODjHB6C8biT8whY7/view?usp=sharing
+
+One way to use these scores is through Annovar. Given a .avinput file with tab delimited:
+
+1. chromosome number
+2. mutation start position
+3. mutation end position (will be the same as start position for SNPs)
+4. reference sequence (nucleotide segment prior to mutation)
+5. mutated segment (nucleotide segment after mutation)
+
+Annovar's table_annovar.pl tool (https://annovar.openbioinformatics.org/en/latest/) can be used to analyze the mutations present in avinput file based on MutFormer scores. 
+
+To demonstrate this capability, we've included a file named "annovar_mutformer_example.zip" as a part of the release. Anonnovar uses perl scripts, so the example uses Anaconda powershell and perl to analyze mutations. To run this example, download and unzip the zip file as well as the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
 
 
 ## To run MutFormer:
