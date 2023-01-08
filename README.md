@@ -62,7 +62,7 @@ Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_
 
 ### Inference
 
-<To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab, for which a Colab notebook is provided, or run inference locally, for which a python script is provided.>
+To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab (using mutformer_finetuning/mutformer_finetuning_eval_predict.inpyb), or run inference locally, for which a python script is provided.
 
 To run the trained MutFormer model, one can run inference locally using a python script provided:
 
@@ -92,7 +92,7 @@ The results of inference will be written into the specified output_file, with ea
 
 ##### Example
 
-To run a basic example, download the zip file from this drive link: https://drive.google.com/file/d/1aubBQMiVthHEGyNOSSKva-CvOvFvPK49/view?usp=sharing. Unzip the file, navigate through the Terminal to the unzipped folder, and run the following command:
+To run a basic example, download this example zip folder: https://drive.google.com/file/d/1aubBQMiVthHEGyNOSSKva-CvOvFvPK49/view?usp=sharing. Unzip the file, navigate through the Terminal to the unzipped folder, and run the following command:
 
 ```
 python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=8 --max_seq_length=1024 --use_ex_data=False
@@ -100,9 +100,6 @@ python run_inference.py --input_file="input_file.txt" --output_file="output_file
 
 The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
 
-<Cloud Run>
-
-<UNFINISHED>
 
 ## Input Data format guidelines:
 
