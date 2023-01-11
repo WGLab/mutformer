@@ -68,7 +68,13 @@ To run the trained MutFormer model, one can run inference locally using a python
 
 #### Local Run
 
-To run MutFormer for inference locally, download/clone the MutFormer repo and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Run the script "run_inference.py," specifying the parameters.
+To run MutFormer for inference locally, download/clone the MutFormer repo and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Create a conda environment using either the "mutformer_inference.yml" or "mutformer_inference_gpu.yml" provided:
+
+```
+conda env create -f mutformer_basic_example.yml -n <desired env name>
+```
+
+Then, run the script "run_inference.py," specifying the parameters.
 
 Parameters for run_inference.py include:
 
@@ -92,7 +98,7 @@ The results of inference will be written into the specified output_file, with ea
 
 ##### Example
 
-To run a basic example, download this example zip folder: https://drive.google.com/file/d/1aubBQMiVthHEGyNOSSKva-CvOvFvPK49/view?usp=sharing. Unzip the file, navigate through the Terminal to the unzipped folder, and run the following command:
+To run a basic example, download this example zip folder: https://drive.google.com/file/d/1aubBQMiVthHEGyNOSSKva-CvOvFvPK49/view?usp=sharing. Unzip the file, navigate through the Terminal to the unzipped folder, and create a conda environment as normal. Activate the environment, then run:
 
 ```
 python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=8 --max_seq_length=1024 --use_ex_data=False
