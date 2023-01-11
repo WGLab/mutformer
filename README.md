@@ -68,10 +68,10 @@ To run the trained MutFormer model, one can run inference locally using a python
 
 #### Local Run
 
-To run MutFormer for inference locally, download/clone the MutFormer repo and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Create a conda environment using either the "mutformer_inference.yml" or "mutformer_inference_gpu.yml" provided:
+To run MutFormer for inference locally, download/clone the MutFormer repo and navigate via Terminal into the folder:  "mutformer/mutformer_inference/local_run." Create a conda environment using the yml file "mutformer_inference.yml" provided:
 
 ```
-conda env create -f mutformer_basic_example.yml -n <desired env name>
+conda env create -f mutformer_inference.yml -n <desired env name>
 ```
 
 Then, run the script "run_inference.py," specifying the parameters.
