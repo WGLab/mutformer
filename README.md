@@ -16,7 +16,7 @@ MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, th
 
 ### Precomputed Scores for MutFormer
 
-We have included precomputed scores for all known missense protein-altering mutations in the humane proteome in the DBNSFP42 database (hg19 build). We have included a file as a release asset called "hg19_mutformer.zip."
+We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included as a release asset file titled "hg19_mutformer.zip."
 
 #### Alternatively, a google drive link: https://drive.google.com/file/d/1950d_f3y9Q6C5I62ODjHB6C8biT8whY7/view?usp=sharing
 
@@ -35,7 +35,7 @@ To demonstrate this capability, we've included a file named "annovar_mutformer_e
 
 ## To run MutFormer:
 
-MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, will provide both colab/cloud TPU and local machine support.
+MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, which provides both colab/cloud TPU and local machine support.
 
 ### Pretraining:
 
@@ -45,24 +45,23 @@ Once the data generation has begun, open "mutformer_run_pretraining.ipynb," and 
 
 Finally, open "mutformer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
-
-You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle evaluating multiple models at once.
+You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle parallel evaluation of multiple models at once.
 
 To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “mutformer_processing_and_viewing_pretraining_results.”
 
 ### Finetuning
 
-For finetuning, there is only one set of files for four modes, so at the top of each notebook there is an option to select the desired mode to use (MRPC for paired strategy, MRPC_w_preds for MRPC with external predictions, RE for single sequence strategy, and NER for pre residue strategy).
+For finetuning, there is only one set of files for four finetuning strategies, so at the top of each notebook, select the desired mode to use (MRPC for paired strategy, MRPC_w_preds for MRPC with external predictions, RE for single sequence strategy, and NER for pre residue strategy).
 
 Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
 
-Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). There are three different options to use: either training multiple models on different sequence lengths, training just one model on multiple sequence lengths with different batch sizes, or training just one single model with specified sequence lengths and specified batch sizes. There are also options for whether to run prediction or evaluation, and which dataset to use.
+Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run through the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). At the bottom of the notebook, there are currently two different benchmarking modes specified, though more can be added according to the same format. Choose and run one of these benchmarking strategies.
 
-Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation (can also evaluate or predict after the fact).
+Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
 
 ### Inference
 
-To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab (using mutformer_finetuning/mutformer_finetuning_eval_predict.inpyb), or run inference locally, for which a python script is provided.
+To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab (using mutformer_finetuning/mutformer_finetuning_eval_predict.inpyb, specifying 'predict' mode in the Eval/prediction loops section), or run inference locally, for which a python script is provided.
 
 To run the trained MutFormer model, one can run inference locally using a python script provided:
 
@@ -90,7 +89,7 @@ Parameters for run_inference.py include:
 
 --batch_size: Number of lines to batch together at a time when performing inference.
 
---max_seq_length: Maximum sequence length to pad to; should be greater than or equal to the three more than twice the length of the longest input amino acid sequence.
+--max_seq_length: Maximum sequence length to pad to; should be greater than or equal to three more than twice the length of the longest input amino acid sequence.
 
 --using_ex_data: set this to True if external data is being included as part of the input data.
 
@@ -105,7 +104,6 @@ python run_inference.py --input_file="input_file.txt" --output_file="output_file
 ```
 
 The inference results of MutFormer on the input file will be in "output_file.txt" in that folder.
-
 
 ## Input Data format guidelines:
 
@@ -156,7 +154,7 @@ The format should be a tsv file with each line containing (tab delimited):
 2.  per residue labels
 3.  mutation position (index; if the 5th residue is mutated the mutation position would be 4) ("P" for pathogenic and "B" for benign). 
 
-The per residue labels should be the same length as the mutated protein sequence. Every residue is labelled as "B" unless it was a mutation site, in which case it was labelled either "B" or "P." The loss is calculated on only the mutation site.
+The per residue labels should be the same length as the mutated protein sequence. Every residue is labeled as "B" unless it was a mutation site, in which case it was labeled either "B" or "P." The loss is calculated on only the mutation site.
 
 
 Example file:
@@ -200,44 +198,44 @@ Example file:
 
 ### Inference
 
-When compiling data for inference, data should be prepared in the following way:
+When compiling data for inference, data should be prepared in the following way (inference uses paired sequence method, as this was the best performing strategy):
     
 The format should be a tsv file with each line containing (tab delimited): 
 1. reference sequence
 2. mutated sequence
-3. If using external data, specify the option when running the inference scripts, and include external data (float values separated by spaces) in the data.
+3. external data, if desired; specify the option when running the inference scripts, and include external data as float values separated by spaces.
 
 For the trained MutFormer models, external data was included according to the following format: 
 
 * All predictions were normalized to values between 1 and 2 by calculating each individual value, if provided, as 1+((provided_value + minimum value in all of DBNSFP) / (maximum value in all of DBNSFP-minimum value in all of DBNSFP)). All values that were missing were assigned a value of 0.
 * The data was gathered from the DBNSFPv3 dataset; all columns used for MutFormer are (27 total): 
-    1. SIFT_score, 
-    2. Polyphen2_HDIV_score, 
-    3. Polyphen2_HVAR_score, 
-    4. LRT_score, 
-    5. MutationTaster_score, 
-    6. MutationAssessor_score, 
-    7. FATHMM_score, 
-    8. PROVEAN_score, 
-    9. VEST3_score	
-    10. CADD_raw	
-    11. CADD_phred
-    12. DANN_score	
-    13. fathmm-MKL_coding_score
-    14. MetaSVM_score	
-    15. MetaLR_score	
-    16. integrated_fitCons_score	
-    17. GERP++_RS	
-    18. phyloP7way_vertebrate	
-    19. phyloP20way_mammalian	
-    20. phastCons7way_vertebrate	
-    21. phastCons20way_mammalian	
-    22. SiPhy_29way_logOdds	
-    23. VARITY_R	
-    24. VARITY_ER	
-    25. VARITY_R_LOO	
-    26. VARITY_ER_LOO	
-    27. MVP_score	
+    1. SIFT_score,
+    2. Polyphen2_HDIV_score,
+    3. Polyphen2_HVAR_score,
+    4. LRT_score,
+    5. MutationTaster_score,
+    6. MutationAssessor_score,
+    7. FATHMM_score,
+    8. PROVEAN_score,
+    9. VEST3_score,
+    10. CADD_raw,
+    11. CADD_phred,
+    12. DANN_score,
+    13. fathmm-MKL_coding_score,
+    14. MetaSVM_score,
+    15. MetaLR_score,
+    16. integrated_fitCons_score,
+    17. GERP++_RS,
+    18. phyloP7way_vertebrate,
+    19. phyloP20way_mammalian,
+    20. phastCons7way_vertebrate,
+    21. phastCons20way_mammalian,
+    22. SiPhy_29way_logOdds,
+    23. VARITY_R,
+    24. VARITY_ER,
+    25. VARITY_R_LOO,
+    26. VARITY_ER_LOO,
+    27. MVP_score
 
 Example file (with external data):
 ```
@@ -259,7 +257,7 @@ L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R
 
 If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
 
-> Jiang, T., Fang, L. & Wang, K. MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations. Preprint at https://arxiv.org/abs/2110.14746 (2021).
+> Jiang, T., Fang, L. & Wang, K. MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations. Preprint at https://arxiv.org/abs/2110.14746 (2022).
 
 Bibtex format: 
 ```
@@ -267,9 +265,6 @@ Bibtex format:
     title={MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations}, 
     author={Theodore Jiang and Li Fang and Kai Wang},
     journal={arXiv preprint arXiv:2110.14746},
-    year={2021}
+    year={2022}
 }
 ```
-
-
-
