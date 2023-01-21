@@ -37,7 +37,7 @@ To demonstrate this capability, we've included a file named "annovar_mutformer_e
 
 MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, which provides both colab/cloud TPU and local machine support.
 
-####Note:
+#### Note:
 
 Because Colab TPUs can only communicate with cloud storage buckets and not google drive, in order to run Mutformer on cloud TPUs using Colab, one should create a storage bucket through Google Cloud Storage (https://cloud.google.com/storage) and paste the name of the bucket in the "BUCKET_NAME" field in the "Configure settings" of each Colab notebook (GCS provides $300 free credit to new users).
 
