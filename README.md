@@ -14,7 +14,9 @@ MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | https://dri
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
-### Precomputed Scores for MutFormer
+## To use MutFormer:
+
+### Precomputed Scores
 
 We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included as a release asset file titled "hg19_mutformer.zip."
 
@@ -28,44 +30,26 @@ One way to use these scores is through Annovar. Given a .avinput file with tab d
 4. reference sequence (nucleotide segment prior to mutation)
 5. mutated segment (nucleotide segment after mutation)
 
-Annovar's table_annovar.pl tool (https://annovar.openbioinformatics.org/en/latest/) can be used to analyze the mutations present in avinput file based on MutFormer scores. 
+Annovar's table_annovar.pl tool (https://annovar.openbioinformatics.org/en/latest/) can be used to analyze the mutations present in avinput file based on MutFormer scores. To use annovar on an avinput formatted file:
 
-To demonstrate this capability, we've included a file named "annovar_mutformer_example.zip" as a part of the release. Anonnovar uses perl scripts, so the example uses Anaconda powershell and perl to analyze mutations. To run this example, download and unzip the zip file as well as the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
+1. Fill out a registration form and download Annovar from the Annovar website: https://www.openbioinformatics.org/annovar/annovar_download_form.php
 
+2. There will most likely be a “/humandb” in the resulting downloaded software folder. Download, unzip, and move  "hg_mutformer.zip" into this humandb folder, and within the software folder, navigate to “annotate_variation.pl.”
 
-## To run MutFormer:
+3. Create a new conda environment, install perl, and run annotate_variation.pl to analyze an avinput file:
 
-MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. To perform inference using MutFormer, see the below "Inference" section which will document usage of code in the "mutformer_inference" folder, which provides both colab/cloud TPU and local machine support.
+```
+conda env create <desired env name>
+conda activate <desired env name>
+conda install perl
+perl table_annovar.pl "<PATH_TO_INPUT_FILE>" humandb/ -protocol MutFormer -operation f -build hg19 -nastring . -out "<DESIRED_OUTPUT_PATH>" -polish
+```
 
-#### Note:
-
-Because Colab TPUs can only communicate with cloud storage buckets and not google drive, in order to run Mutformer on cloud TPUs using Colab, one should create a storage bucket through Google Cloud Storage (https://cloud.google.com/storage) and paste the name of the bucket in the "BUCKET_NAME" field in the "Configure settings" of each Colab notebook (GCS provides $300 free credit to new users).
-
-### Pretraining:
-
-Under the folder titled "mutformer_pretraining," first open "mutformer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
-
-Once the data generation has begun, open "mutformer_run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
-
-Finally, open "mutformer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
-
-You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle parallel evaluation of multiple models at once.
-
-To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “mutformer_processing_and_viewing_pretraining_results.”
-
-### Finetuning
-
-For finetuning, there is only one set of files for four finetuning strategies, so at the top of each notebook, select the desired mode to use (MRPC for paired strategy, MRPC_w_preds for MRPC with external predictions, RE for single sequence strategy, and NER for pre residue strategy).
-
-Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
-
-Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run through the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). At the bottom of the notebook, there are currently two different benchmarking modes specified, though more can be added according to the same format. Choose and run one of these benchmarking strategies.
-
-Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+We have also included an example setup as a zip file: "annovar_mutformer_example.zip" with the release. Anonnovar uses perl scripts, so the example uses Anaconda powershell and Annovar’s “annotate_variation” perl script to analyze mutations. To run this example, download and unzip the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
 
 ### Inference
 
-To run the trained MutFormer model, one can choose either to run MutFormer on a cloud TPU via Colab (using mutformer_finetuning/mutformer_finetuning_eval_predict.inpyb, specifying 'predict' mode in the Eval/prediction loops section), or run inference locally, for which a python script is provided.
+To run the trained MutFormer model, one can choose to run MutFormer on a cloud TPU via Colab (using mutformer_finetuning/mutformer_finetuning_eval_predict.inpyb, specifying 'predict' mode in the Eval/prediction loops section), run inference locally, for which a python script is provided, or use a mutation annotation software such as annovar.
 
 To run the trained MutFormer model, one can run inference locally using a python script provided:
 
@@ -97,7 +81,7 @@ Parameters for run_inference.py include:
 
 --using_ex_data: set this to True if external data is being included as part of the input data.
 
-The results of inference will be written into the specified output_file, with each row corresponding to a 2 label probability (first index is probability for benign, second index is probability for pathogenic) prediction of the pathogenicity for each of the inputs.
+The results of inference will be written into the specified output_file, with each row corresponding to a 2 label probability prediction of the inputs (first index (0) is probability for benign, second index (1) is probability for pathogenic).
 
 ##### Example
 
@@ -257,6 +241,38 @@ L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E
 L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L
 ```
     
+##For a Reproducable Workflow
+
+#### Note:
+
+MutFomer's model code was written in Tensorflow, and training and inference were run using the TPUEstimator API for Tensorflow 1.15 on cloud TPUs provided by either Google Colab or Google Cloud Platform. For this reason, the notebooks used to both train and finetune MutFormer are built for usage in Google Colab on cloud TPUs. 
+
+Because Colab TPUs can only communicate with cloud storage buckets and not google drive, in order to run Mutformer on cloud TPUs using Colab, one should create a storage bucket through Google Cloud Storage (https://cloud.google.com/storage) and paste the name of the bucket in the "BUCKET_NAME" field in the "Configure settings" of each Colab notebook (GCS provides $300 free credit to new users).
+
+Google Colab has officially removed support for Tensorflow 1.15 as of late 2022; the notebooks were updated and tested to function properly as of late Janurary 2023, but if version errors arise when attempting to run a notebook, please raise an issue with the notebook settings as well as the error message and corresponding code block.
+
+### Pretraining:
+
+Under the folder titled "mutformer_pretraining," first open "mutformer_pretraining_data generation_(with dynamic masking op).ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate eval and test data, as well as begin the constant training data generation with dynamic masking.
+
+Once the data generation has begun, open "mutformer_run_pretraining.ipynb," and in a different runtime, run the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise) to start the training.
+
+Finally, open "mutformer_run_pretraining_eval.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+
+You can make multiple copies of the data generation and run_pretraining scripts to train multiple models at a time. The evaluation script is able to handle parallel evaluation of multiple models at once.
+
+To view pretraining graphs or download the checkpoints from GCS, use the notebook titled “mutformer_processing_and_viewing_pretraining_results.”
+
+### Finetuning
+
+For finetuning, there is only one set of files for four finetuning strategies, so at the top of each notebook, select the desired mode to use (MRPC for paired strategy, MRPC_w_preds for MRPC with external predictions, RE for single sequence strategy, and NER for pre residue strategy).
+
+Under the folder titled "mutformer_finetuning," first open "mutformer_finetuning_data_generation.ipynb," and run through the code segments (if using colab, runtime options: Hardware Accelerator-None, Runtime shape-Standard), selecting the desired options along the way, to generate train,eval,and test data.
+
+Once the data generation has finished, open "mutformer_finetuning_benchmark.ipynb," and in a different runtime, run through the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-High RAM if available, Standard otherwise). At the bottom of the notebook, there are currently two different benchmarking modes specified, though more can be added according to the same format. Choose and run one of these benchmarking strategies.
+
+Finally, alongside running mutformer_run_finetuning, open "mutformer_finetuning_benchmark_eval_predict.ipynb" and run all the code segments there (if using colab, runtime options: Hardware Accelerator-TPU, Runtime shape-Standard) in another runtime to begin the parallel evaluation operation.
+
 # Citation
 
 If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
