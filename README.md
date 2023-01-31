@@ -45,7 +45,7 @@ conda install perl
 perl table_annovar.pl "<PATH_TO_INPUT_FILE>" humandb/ -protocol MutFormer -operation f -build hg19 -nastring . -out "<DESIRED_OUTPUT_PATH>" -polish
 ```
 
-We have also included an example setup as a zip file: "annovar_mutformer_example.zip" with the release. Anonnovar uses perl scripts, so the example uses Anaconda powershell and Annovar’s “annotate_variation” perl script to analyze mutations. To run this example, download and unzip the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
+We have also included an example setup as a zip file: "annovar_mutformer_example.zip" with the release. To run this example, download and unzip the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
 
 ### Inference
 
