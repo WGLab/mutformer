@@ -5,12 +5,12 @@ For this project, a total of 6 models were trained:
 
 Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
-MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | https://drive.google.com/drive/folders/1dJwSPWOU8VVLwQbe8UlxSLyAiJqCWszn?usp=sharing
-MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | https://drive.google.com/drive/folders/1--nJNAwCB5weLH8NclNYJsrYDx2DZUhj?usp=sharing
-MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | https://drive.google.com/drive/folders/1-LXP5dpO071JYvbxRaG7hD9vbcp0aWmf?usp=sharing
-MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | https://drive.google.com/drive/folders/1-GWOe1uiosBxy5Y5T_3NkDbSrv9CXCwR?usp=sharing
-MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | https://drive.google.com/drive/folders/1-59X7Wu7OMDB8ddnghT5wvthbmJ9vjo5?usp=sharing
-MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | https://drive.google.com/drive/folders/1jcK2mckj_oJaR1QQVzjBuoOEJC5SWDu5?usp=sharing
+MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | www.openbioinformatics.org/mutformer/MutBERT_8L.zip
+MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | www.openbioinformatics.org/mutformer/MutBERT_10L.zip
+MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | www.openbioinformatics.org/mutformer/MutFormer_8L.zip
+MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | www.openbioinformatics.org/mutformer/MutFormer_10L.zip
+MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | www.openbioinformatics.org/mutformer/MutFormer_12L.zip
+MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | www.openbioinformatics.org/mutformer/MutFormer_emb_adap_8L.zip
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
@@ -20,7 +20,7 @@ MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, th
 
 We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included as a release asset file titled "hg19_mutformer.zip."
 
-#### Alternatively, a google drive link: https://drive.google.com/file/d/1950d_f3y9Q6C5I62ODjHB6C8biT8whY7/view?usp=sharing
+#### Alternatively, a direct link: www.openbioinformatics.org/mutformer/hg19_MutFormer.zip
 
 One way to use these scores is through Annovar. Given a .avinput file with tab delimited:
 
@@ -85,7 +85,7 @@ The results of inference will be written into the specified output_file, with ea
 
 ##### Example
 
-To run a basic example, download this example zip folder: https://drive.google.com/file/d/1aubBQMiVthHEGyNOSSKva-CvOvFvPK49/view?usp=sharing. Unzip the file, navigate through the Terminal to the unzipped folder, and create a conda environment as normal. Activate the environment, then run:
+To run a basic example, download this example zip folder: www.openbioinformatics.org/mutformer/basic_example.zip. Unzip the file, navigate through the Terminal to the unzipped folder, and create a conda environment as normal. Activate the environment, then run:
 
 ```
 python run_inference.py --input_file="input_file.txt" --output_file="output_file.txt" --model_folder="model_ckpt_folder" --model_architecture="MutFormer_embedded_convs" --vocab_file="vocab.txt" --batch_size=8 --max_seq_length=1024 --use_ex_data=False
@@ -108,7 +108,7 @@ During finetuning, whenever splitting was required, we placed the mutation at th
 
 #### We have included our pretraining data in this repository as an asset, called "pretraining_data.zip" 
 
-#### Alternatively, a google drive link: https://drive.google.com/drive/folders/1QlTx0iOS8aVKnD0fegkG5JOY6WGH9u_S?usp=sharing
+#### Alternatively, a google drive link: www.openbioinformatics.org/mutformer/pretraining_data.zip
 
 The format should be a txt with each line containing one sequence. Each sequence should be trimmed/split to a maximum of a fixed length (in our case we used 1024 amino acids). 
 
