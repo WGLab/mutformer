@@ -3,9 +3,9 @@ MutFormer is an application of the BERT (Bidirectional Encoder Representations f
 
 For this project, a total of 6 models were trained:
 
-Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link
+Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link (right click mouse "save link as...")
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
-MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | http://www.openbioinformatics.org/mutformer/MutBERT_8L.zip
+MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | [download](http://www.openbioinformatics.org/mutformer/MutBERT_8L.zip)
 MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | http://www.openbioinformatics.org/mutformer/MutBERT_10L.zip
 MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | http://www.openbioinformatics.org/mutformer/MutFormer_8L.zip
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | http://www.openbioinformatics.org/mutformer/MutFormer_10L.zip
@@ -20,7 +20,7 @@ MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, th
 
 We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included as a release asset file titled "hg19_mutformer.zip."
 
-#### Alternatively, a direct link: www.openbioinformatics.org/mutformer/hg19_MutFormer.zip
+#### Alternatively, a direct link: http://www.openbioinformatics.org/mutformer/hg19_MutFormer.zip
 
 One way to use these scores is through Annovar. Given a .avinput file with tab delimited:
 
