@@ -5,7 +5,7 @@ For this project, a total of 6 models were trained:
 
 Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link (right click mouse "save link as...")
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
-MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | [download](http://www.openbioinformatics.org/mutformer/MutBERT_8L.zip)
+MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | http://www.openbioinformatics.org/mutformer/MutBERT_8L.zip
 MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | http://www.openbioinformatics.org/mutformer/MutBERT_10L.zip
 MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | http://www.openbioinformatics.org/mutformer/MutFormer_8L.zip
 MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | http://www.openbioinformatics.org/mutformer/MutFormer_10L.zip
