@@ -1,7 +1,7 @@
 # MutFormer
 MutFormer is an application of the BERT (Bidirectional Encoder Representations from Transformers) NLP (Natural Language Processing) model with an added adaptive vocabulary to protein context, for the purpose of predicting the effect of missense mutations on protein function.
 
-For this project, a total of 5 models were trained:
+For this project, a total of 6 models were trained:
 
 Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
