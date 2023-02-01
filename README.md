@@ -5,12 +5,12 @@ For this project, a total of 6 models were trained:
 
 Model Name | Hidden Layers | Hidden Size (and size of convolution filters) | Intermediate Size | Input length | # of parameters | Download link
 -----------|---------------|-------------|-------------------|--------------|-----------------|--------------
-MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | www.openbioinformatics.org/mutformer/MutBERT_8L.zip
-MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | www.openbioinformatics.org/mutformer/MutBERT_10L.zip
-MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | www.openbioinformatics.org/mutformer/MutFormer_8L.zip
-MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | www.openbioinformatics.org/mutformer/MutFormer_10L.zip
-MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | www.openbioinformatics.org/mutformer/MutFormer_12L.zip
-MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | www.openbioinformatics.org/mutformer/MutFormer_emb_adap_8L.zip
+MutBERT8L | 8 | 768 | 3072 | 1024 | ~58M | http://www.openbioinformatics.org/mutformer/MutBERT_8L.zip
+MutBERT10L | 10 | 770 | 3072 | 1024 | ~72M | http://www.openbioinformatics.org/mutformer/MutBERT_10L.zip
+MutFormer8L | 8 | 768 | 3072 | 1024 | ~62M | http://www.openbioinformatics.org/mutformer/MutFormer_8L.zip
+MutFormer10L | 10 | 770 | 3072 | 1024 | ~76M | http://www.openbioinformatics.org/mutformer/MutFormer_10L.zip
+MutFormer12L (Same size transformer as BERT-base) | 12 | 768 | 3072 | 1024 | ~86M | http://www.openbioinformatics.org/mutformer/MutFormer_12L.zip
+MutFormer8L (integrated adap vocab) | 8 | 768 | 3072 | 1024 | ~64M | http://www.openbioinformatics.org/mutformer/MutFormer_emb_adap_8L.zip
 
 MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, the MutFormer models are the official models.
 
