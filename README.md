@@ -241,7 +241,7 @@ L L D S S L D P E P T Q S K L V R L E P L T E A E A S E A T    L L D S S L D P E
 L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R R R L E E Q A T Q H K A D I E E R L A Q L
 ```
     
-## For Reproducable Workflow
+## For Reproducible Workflow
 
 #### Note:
 
