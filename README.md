@@ -18,7 +18,7 @@ MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, th
 
 ### Precomputed Scores
 
-We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included as a release asset file titled "hg19_mutformer.zip."
+We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included in both hg19 and hg39 coordinates as an asset file titled "hg19_mutformer.zip" and "hg38_mutformer.zip."
 
 #### Alternatively, a direct link: http://www.openbioinformatics.org/mutformer/hg19_MutFormer.zip
 
@@ -34,7 +34,7 @@ Annovar's table_annovar.pl tool (https://annovar.openbioinformatics.org/en/lates
 
 1. Fill out a registration form and download Annovar from the Annovar website: https://www.openbioinformatics.org/annovar/annovar_download_form.php
 
-2. There will most likely be a “/humandb” in the resulting downloaded software folder. Download, unzip, and move  "hg_mutformer.zip" into this humandb folder, and within the software folder, navigate to “annotate_variation.pl.”
+2. There will most likely be a “/humandb” in the resulting downloaded software folder. Download, unzip, and move  "hg19_mutformer.zip" into this humandb folder, and within the software folder, navigate to “annotate_variation.pl.”
 
 3. Create a new conda environment, install perl, and run annotate_variation.pl to analyze an avinput file:
 
@@ -45,7 +45,7 @@ conda install perl
 perl table_annovar.pl "<PATH_TO_INPUT_FILE>" humandb/ -protocol MutFormer -operation f -build hg19 -nastring . -out "<DESIRED_OUTPUT_PATH>" -polish
 ```
 
-We have also included an example setup as a zip file: "annovar_mutformer_example.zip" with the release. To run this example, download and unzip the "hg_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
+We have also included an example setup as a zip file: "annovar_mutformer_example.zip" with the release. To run this example, download and unzip the "hg19_mutformer.zip" scores file, and follow the instructions in the README.txt within the folder.
 
 ### Inference
 
