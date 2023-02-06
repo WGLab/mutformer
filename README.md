@@ -163,7 +163,7 @@ L A E D E A F Q R R R L E E Q A A Q H K A D I E E R L A Q L    L A E D E A F Q R
     
 ## For Reproducible Workflow
 
-For a reproducible workflow of pretraining and finetuning the MutFormer models, see Reproducible_Workflow.txt.
+For a reproducible workflow of pretraining and finetuning the MutFormer models, see Reproducible_Workflow.md.
 
 #### Note:
 
