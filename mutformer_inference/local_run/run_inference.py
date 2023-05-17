@@ -62,7 +62,7 @@ def compile_single_example(line):
         segment_ids.append(0)
         input_mask.append(0)
     tokens = [vocab.index(x) for x in tokens]
-    return tokens, segment_ids, input_mask, line_components[3] if FLAGS.use_ex_data else None
+    return tokens, segment_ids, input_mask, line_components[2] if FLAGS.use_ex_data else None
 
 
 def run_model_for_probabilities(config,
