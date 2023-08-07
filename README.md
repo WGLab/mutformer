@@ -175,16 +175,20 @@ Google Colab has officially removed support for Tensorflow 1.15 as of late 2022;
 
 # Citation
 
-If you use MutFormer, please cite the [arXiv paper](https://arxiv.org/abs/2110.14746v1): 
+If you use MutFormer, please cite [our paper](https://doi.org/10.1016/j.xinn.2023.100487): 
 
-> Jiang, T., Fang, L. & Wang, K. MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations. Preprint at https://arxiv.org/abs/2110.14746 (2022).
+> Theodore T. Jiang, Li Fang, Kai Wang, Deciphering “the language of nature”: A transformer-based language model for deleterious mutations in proteins, The Innovation, 2023, 100487, ISSN 2666-6758, https://doi.org/10.1016/j.xinn.2023.100487.
 
 Bibtex format: 
 ```
-@article{jiang2021mutformer,
-    title={MutFormer: A context-dependent transformer-based model to predict pathogenic missense mutations}, 
-    author={Theodore Jiang and Li Fang and Kai Wang},
-    journal={arXiv preprint arXiv:2110.14746},
-    year={2022}
+@article{JIANG2023100487,
+title = {Deciphering “the language of nature”: A transformer-based language model for deleterious mutations in proteins},
+journal = {The Innovation},
+pages = {100487},
+year = {2023},
+issn = {2666-6758},
+doi = {https://doi.org/10.1016/j.xinn.2023.100487},
+url = {https://www.sciencedirect.com/science/article/pii/S2666675823001157},
+author = {Theodore T. Jiang and Li Fang and Kai Wang},
 }
 ```
