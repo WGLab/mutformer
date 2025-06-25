@@ -1,4 +1,6 @@
 # MutFormer
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15735111.svg)](https://doi.org/10.5281/zenodo.15735111)
+
 MutFormer is an application of the BERT (Bidirectional Encoder Representations from Transformers) NLP (Natural Language Processing) model with an added adaptive vocabulary to protein context, for the purpose of predicting the effect of missense mutations on protein function.
 
 For this project, a total of 6 models were trained:
@@ -18,9 +20,8 @@ MutBERT8L and MutBERT10L use the original BERT model for comparison purposes, th
 
 ### Precomputed Scores
 
-We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). This has been included in both hg19 and hg39 coordinates as an asset file titled "hg19_mutformer.zip" and "hg38_mutformer.zip."
+We have included precomputed scores for all known missense protein-altering mutations in the human proteome in the DBNSFP42 database (hg19 build). The precomputed scores (both hg19 and hg39) are available on zenodo ([![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15735111.svg)](https://doi.org/10.5281/zenodo.15735111)).
 
-#### Alternatively, a direct link: http://www.openbioinformatics.org/mutformer/hg19_MutFormer.zip
 
 One way to use these scores is through Annovar. Given a .avinput file with tab delimited:
 
